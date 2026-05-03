@@ -50,7 +50,7 @@
         <div class="nav-pill rounded-full px-6 py-3 flex space-x-6 text-sm font-bold tracking-wider uppercase text-white">
             <a href="{{ route('dashboard') }}" class="hover:text-blue-300 transition">Home</a>
             <a href="{{ route('user.catalog') }}" class="hover:text-blue-300 transition">Catalog</a>
-            <a href="#" class="hover:text-blue-300 transition">Destination</a>
+            <a href="{{ route('user.destination') }}" class="hover:text-blue-300 transition">Destination</a>
             <a href="{{ route('user.orders') }}" class="hover:text-blue-300 transition">Orders</a>
         </div>
         <div class="flex space-x-4 items-center">

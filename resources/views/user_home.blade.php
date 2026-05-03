@@ -133,7 +133,7 @@
             
             <a href="{{ route('user.catalog') }}" class="hover:text-blue-300 transition">Catalog</a>
             
-            <a href="#" class="hover:text-blue-300 transition">Destination</a>
+            <a href="{{ route('user.destination') }}" class="hover:text-blue-300 transition">Destination</a>
             
             <!-- 👇 Link Orders yang udah di-update 👇 -->
             <a href="{{ route('user.orders') }}" class="hover:text-blue-300 transition">Orders</a>
@@ -146,8 +146,14 @@
             <!-- Tombol Logout Sementara (Nempel di Icon User) -->
             <form action="{{ route('logout') }}" method="POST" class="m-0">
                 @csrf
-                <a href="{{ route('user.profile') }}" class="w-10 h-10 rounded-full nav-pill flex items-center justify-center hover:bg-white/20 transition text-white">
-    <i class="fa-solid fa-user text-lg"></i>
+                <a href="{{ route('user.profile') }}" class="w-10 h-10 rounded-full nav-pill flex items-center justify-center hover:bg-white/20 transition text-white overflow-hidden relative border border-white/20">
+    @if(Auth::user()->profile_photo)
+        <!-- Kalau ada foto, tampilkan fotonya nutupin buletan -->
+        <img src="{{ asset('storage/' . Auth::user()->profile_photo) }}" class="w-full h-full object-cover absolute inset-0">
+    @else
+        <!-- Kalau gak ada foto, tampilkan icon orang -->
+        <i class="fa-solid fa-user text-lg"></i>
+    @endif
 </a>
             </form>
 

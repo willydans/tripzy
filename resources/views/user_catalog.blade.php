@@ -81,7 +81,7 @@
         <div class="nav-pill rounded-full px-6 py-3 flex space-x-6 text-sm font-bold tracking-wider uppercase text-white">
             <a href="{{ route('dashboard') }}" class="hover:text-blue-300 transition">Home</a>
             <a href="{{ route('user.catalog') }}" class="text-blue-300 hover:text-white transition drop-shadow-md">Catalog</a>
-            <a href="#" class="hover:text-blue-300 transition">Destination</a>
+            <a href="{{ route('user.destination') }}" class="hover:text-blue-300 transition">Destination</a>
             <a href="{{ route('user.orders') }}" class="hover:text-blue-300 transition">Orders</a>
         </div>
 
@@ -89,8 +89,14 @@
         <div class="flex space-x-4 items-center">
             <form action="{{ route('logout') }}" method="POST" class="m-0">
                 @csrf
-                <a href="{{ route('user.profile') }}" class="w-10 h-10 rounded-full nav-pill flex items-center justify-center hover:bg-white/20 transition text-white">
-    <i class="fa-solid fa-user text-lg"></i>
+                <a href="{{ route('user.profile') }}" class="w-10 h-10 rounded-full nav-pill flex items-center justify-center hover:bg-white/20 transition text-white overflow-hidden relative border border-white/20">
+    @if(Auth::user()->profile_photo)
+        <!-- Kalau ada foto, tampilkan fotonya nutupin buletan -->
+        <img src="{{ asset('storage/' . Auth::user()->profile_photo) }}" class="w-full h-full object-cover absolute inset-0">
+    @else
+        <!-- Kalau gak ada foto, tampilkan icon orang -->
+        <i class="fa-solid fa-user text-lg"></i>
+    @endif
 </a>
             </form>
             <button class="w-10 h-10 rounded-full nav-pill flex items-center justify-center hover:bg-white/20 transition text-white">
