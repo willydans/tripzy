@@ -82,7 +82,7 @@
             <a href="{{ route('dashboard') }}" class="hover:text-blue-300 transition">Home</a>
             <a href="{{ route('user.catalog') }}" class="text-blue-300 hover:text-white transition drop-shadow-md">Catalog</a>
             <a href="#" class="hover:text-blue-300 transition">Destination</a>
-            <a href="#" class="hover:text-blue-300 transition">Orders</a>
+            <a href="{{ route('user.orders') }}" class="hover:text-blue-300 transition">Orders</a>
         </div>
 
         <!-- Right: Profile & Notifications -->

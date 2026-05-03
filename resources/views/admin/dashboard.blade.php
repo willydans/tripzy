@@ -29,21 +29,28 @@
             <p class="text-sm font-medium opacity-90">Admin Panel</p>
         </div>
         <nav class="mt-6 flex-grow flex flex-col gap-2 px-4">
+            
+            <!-- 👇 Menu Aktif (Karena ini halaman Dashboard) 👇 -->
             <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-4 py-3 bg-white/20 rounded-lg font-semibold border border-white/30 backdrop-blur-sm shadow-sm transition">
                 Dashboard
             </a>
-            <a href="#" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-lg font-medium opacity-80 hover:opacity-100 transition">
+            
+            <a href="{{ route('admin.bookings.index') }}" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-lg font-medium opacity-80 hover:opacity-100 transition">
                 Booking Verification
             </a>
+            
             <a href="{{ route('admin.catalog.index') }}" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-lg font-medium opacity-80 hover:opacity-100 transition">
                 Manage Catalog
             </a>
+            
             <a href="#" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-lg font-medium opacity-80 hover:opacity-100 transition">
                 User Management
             </a>
+            
             <a href="#" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-lg font-medium opacity-80 hover:opacity-100 transition">
                 Transactions
             </a>
+            
         </nav>
     </aside>
 

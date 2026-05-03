@@ -127,15 +127,16 @@
     <!-- NAVBAR (Fixed) -->
     <nav class="fixed top-6 left-0 right-0 z-50 px-8 flex justify-between items-center">
         <!-- Left: Navigation Links -->
-        <div class="nav-pill rounded-full px-6 py-3 flex space-x-6 text-sm font-bold tracking-wider uppercase">
-            <!-- Update link Home ke dashboard -->
-            <a href="{{ route('dashboard') }}" class="hover:text-blue-300 transition">Home</a>
+        <div class="nav-pill rounded-full px-6 py-3 flex space-x-6 text-sm font-bold tracking-wider uppercase text-white">
+            <!-- Menu Aktif (Home) -->
+            <a href="{{ route('dashboard') }}" class="text-blue-300 transition border-b-2 border-blue-300 pb-1">Home</a>
             
-            <!-- Update link Catalog ke user.catalog 👇 -->
             <a href="{{ route('user.catalog') }}" class="hover:text-blue-300 transition">Catalog</a>
             
             <a href="#" class="hover:text-blue-300 transition">Destination</a>
-            <a href="#" class="hover:text-blue-300 transition">Orders</a>
+            
+            <!-- 👇 Link Orders yang udah di-update 👇 -->
+            <a href="{{ route('user.orders') }}" class="hover:text-blue-300 transition">Orders</a>
         </div>
 
 
