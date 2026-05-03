@@ -20,10 +20,17 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'password',
         'nomor_hp',
         'tanggal_lahir',
         'jenis_kelamin',
-        'password',
+        'role',
+        'kota',
+        'alamat',
+        'nomor_sim',
+        'jenis_sim',
+        'masa_berlaku_sim',
+        'profile_photo',
     ];
 
     /**
@@ -43,16 +50,8 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'tanggal_lahir' => 'date', // Biar otomatis jadi format tanggal (Carbon)
-        'password' => 'hashed',    // Standar Laravel terbaru untuk auto hash password
+        'password' => 'hashed',
+        'tanggal_lahir' => 'date',
+        'masa_berlaku_sim' => 'date',
     ];
-
-    /**
-     * Relasi ke tabel bookings.
-     * Satu User bisa punya banyak transaksi sewa (Booking).
-     */
-    public function bookings()
-    {
-        return $this->hasMany(Booking::class);
-    }
 }

@@ -51,9 +51,9 @@
             <a href="{{ route('user.orders') }}" class="text-blue-300 transition border-b-2 border-blue-300 pb-1">Orders</a>
         </div>
         <div class="flex space-x-4 items-center">
-            <button class="w-10 h-10 rounded-full nav-pill flex items-center justify-center hover:bg-white/20 transition text-white">
-                <i class="fa-solid fa-user text-lg"></i>
-            </button>
+            <a href="{{ route('user.profile') }}" class="w-10 h-10 rounded-full nav-pill flex items-center justify-center hover:bg-white/20 transition text-white">
+    <i class="fa-solid fa-user text-lg"></i>
+</a>
             <button class="w-10 h-10 rounded-full nav-pill flex items-center justify-center hover:bg-white/20 transition text-white">
                 <i class="fa-solid fa-bell text-lg"></i>
             </button>

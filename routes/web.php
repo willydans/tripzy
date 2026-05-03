@@ -5,7 +5,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController; 
 use App\Http\Controllers\AdminCarController; 
 use App\Http\Controllers\AdminBookingController; 
-use App\Http\Controllers\OrderController; // 👈 Wajib ditambahin buat narik data pesanan user
+use App\Http\Controllers\OrderController; 
+use App\Http\Controllers\ProfileController; // 👈 Wajib ditambahin buat ngatur Profil User
 use App\Models\Car; 
 
 /*
@@ -56,9 +57,13 @@ Route::middleware('auth')->group(function () {
     // Detail Mobil Khusus (Checkout)
     Route::get('/dashboard/catalog/{slug}', [App\Http\Controllers\CarController::class, 'show'])->name('user.car.detail');
 
-    // 👇 ROUTE UNTUK HALAMAN ORDERS (MY BOOKINGS) 👇
+    // ROUTE UNTUK HALAMAN ORDERS (MY BOOKINGS)
     Route::get('/orders', [OrderController::class, 'index'])->name('user.orders');
     Route::post('/orders/{id}/cancel', [OrderController::class, 'cancel'])->name('user.orders.cancel');
+    
+    // 👇 ROUTE UNTUK USER PROFILE 👇
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('user.profile');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('user.profile.update');
     
     // Proses Logout (Bisa dipakai barengan sama admin)
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

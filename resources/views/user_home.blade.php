@@ -146,9 +146,9 @@
             <!-- Tombol Logout Sementara (Nempel di Icon User) -->
             <form action="{{ route('logout') }}" method="POST" class="m-0">
                 @csrf
-                <button type="submit" class="w-10 h-10 rounded-full nav-pill flex items-center justify-center hover:bg-red-500/50 transition cursor-pointer" title="Klik untuk Logout">
-                    <i class="fa-solid fa-user text-lg"></i>
-                </button>
+                <a href="{{ route('user.profile') }}" class="w-10 h-10 rounded-full nav-pill flex items-center justify-center hover:bg-white/20 transition text-white">
+    <i class="fa-solid fa-user text-lg"></i>
+</a>
             </form>
 
             <button class="w-10 h-10 rounded-full nav-pill flex items-center justify-center hover:bg-white/20 transition">
