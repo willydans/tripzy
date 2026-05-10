@@ -138,7 +138,7 @@
         <div class="card-container px-4 relative z-10">
             
             <!-- Card 1 (Default Active) -->
-            <div class="dest-card active" style="background-image: url('https://images.unsplash.com/photo-1544256718-3b10b06abdb9?q=80&w=1000&auto=format&fit=crop');" onclick="activateCard(this)">
+            <div class="dest-card active" style="background-image: url('https://heartline.co.id/wp-content/uploads/2025/01/Pulau-Pahawang-Sebuah-Permata-Tersembunyi-Di-Lampung-05.jpg');" onclick="activateCard(this)">
                 <div class="card-overlay"></div>
                 
                 <!-- Konten saat menyusut (Inactive) -->
@@ -158,7 +158,7 @@
             </div>
 
             <!-- Card 2 -->
-            <div class="dest-card inactive" style="background-image: url('https://images.unsplash.com/photo-1552596222-72c28a0f1db0?q=80&w=1000&auto=format&fit=crop');" onclick="activateCard(this)">
+            <div class="dest-card inactive" style="background-image: url('https://akcdn.detik.net.id/community/media/visual/2024/01/29/gajah-sumatera-di-taman-nasional-way-kambas_169.jpeg?w=700&q=90');" onclick="activateCard(this)">
                 <div class="card-overlay"></div>
                 <div class="card-inactive-content absolute inset-0 flex flex-col items-center justify-between py-8">
                     <div class="w-0.5 h-16 bg-white/60"></div>
@@ -174,7 +174,7 @@
             </div>
 
             <!-- Card 3 -->
-            <div class="dest-card inactive" style="background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1000&auto=format&fit=crop');" onclick="activateCard(this)">
+            <div class="dest-card inactive" style="background-image: url('https://ik.imagekit.io/tvlk/blog/2024/07/shutterstock_492879184.jpg?tr=q-70,c-at_max,w-1000,h-600');" onclick="activateCard(this)">
                 <div class="card-overlay"></div>
                 <div class="card-inactive-content absolute inset-0 flex flex-col items-center justify-between py-8">
                     <div class="w-0.5 h-16 bg-white/60"></div>
@@ -190,7 +190,7 @@
             </div>
 
             <!-- Card 4 -->
-            <div class="dest-card inactive" style="background-image: url('https://images.unsplash.com/photo-1520483601560-389dff434fdf?q=80&w=1000&auto=format&fit=crop');" onclick="activateCard(this)">
+            <div class="dest-card inactive" style="background-image: url('https://www.batiqa.com/upload/news/z/lampung-pantai-gigi-hiu_3mnwt.jpg');" onclick="activateCard(this)">
                 <div class="card-overlay"></div>
                 <div class="card-inactive-content absolute inset-0 flex flex-col items-center justify-between py-8">
                     <div class="w-0.5 h-16 bg-white/60"></div>
@@ -206,7 +206,7 @@
             </div>
 
             <!-- Card 5 -->
-            <div class="dest-card inactive" style="background-image: url('https://images.unsplash.com/photo-1589394815804-964ce0ff81a7?q=80&w=1000&auto=format&fit=crop');" onclick="activateCard(this)">
+            <div class="dest-card inactive" style="background-image: url('https://s-light.tiket.photos/t/01E25EBZS3W0FY9GTG6C42E1SE/rsfit1440960gsm/events/2024/01/18/f0f500bb-fea9-4e4b-9443-88a0ea9ad65d-1705550023217-4f1de8e38bb54e954f45ac776c75d4b5.png');" onclick="activateCard(this)">
                 <div class="card-overlay"></div>
                 <div class="card-inactive-content absolute inset-0 flex flex-col items-center justify-between py-8">
                     <div class="w-0.5 h-16 bg-white/60"></div>
@@ -222,7 +222,7 @@
             </div>
 
             <!-- Card 6 -->
-            <div class="dest-card inactive" style="background-image: url('https://images.unsplash.com/photo-1432405972618-fc2c07040d9c?q=80&w=1000&auto=format&fit=crop');" onclick="activateCard(this)">
+            <div class="dest-card inactive" style="background-image: url('https://wisato.id/wp-content/uploads/2019/11/Curup-Gangsa-@igustimade.wira_.jpg" onclick="activateCard(this)">
                 <div class="card-overlay"></div>
                 <div class="card-inactive-content absolute inset-0 flex flex-col items-center justify-between py-8">
                     <div class="w-0.5 h-16 bg-white/60"></div>

@@ -184,30 +184,30 @@
         <div class="grid grid-cols-2 gap-4">
             <!-- MPV -->
             <div class="cat-card bg-black rounded-2xl h-40 relative overflow-hidden flex items-end justify-start p-4 cursor-pointer">
-                <img src="https://images.unsplash.com/photo-1542362567-b07e54358753?q=80&w=800&auto=format&fit=crop" alt="MPV" class="absolute inset-0 w-full h-full object-cover opacity-60">
+                <img src="https://lh7-rt.googleusercontent.com/docsz/AD_4nXffY-FoeXKYte6W1UY3iuxD9_KEdvf0omethmnckaqamaXPs4nfbmCe4tLxIDUcQMJiwsh5wtMTkl-s9gniBkZpXZmzR4f_esdPlYvkPwq2RbGqKb8Cu3inyR1fIOxyrn7JCd2fFsf4_th0suuFDvrqt4g?key=M190abu9NCcURv-H7bmJ7w" alt="MPV" class="absolute inset-0 w-full h-full object-cover opacity-60">
                 <h3 class="relative z-10 text-white font-extrabold text-xl uppercase drop-shadow-md">MPV</h3>
             </div>
             <!-- SUV -->
             <div class="cat-card bg-black rounded-2xl h-40 relative overflow-hidden flex items-end justify-end p-4 cursor-pointer">
-                <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=800&auto=format&fit=crop" alt="SUV" class="absolute inset-0 w-full h-full object-cover opacity-60">
+                <img src="https://www3.wuling.id/wp-content/uploads/2022/09/Beragam-Jenis-Mobil-SUV-Cover.jpg" alt="SUV" class="absolute inset-0 w-full h-full object-cover opacity-60">
                 <h3 class="relative z-10 text-white font-extrabold text-xl uppercase drop-shadow-md">SUV</h3>
             </div>
             
             <!-- Luxury SUV MPV (Besar 2 Kolom) -->
             <div class="cat-card col-span-2 rounded-2xl h-48 relative overflow-hidden flex items-end justify-center pb-4 cursor-pointer">
-                <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop');"></div>
+                <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://scene7.toyota.eu/is/image/toyotaeurope/2025-lexus-lm-gallery-exterior-02-1920x1080-00:Large-Landscape?ts=0&resMode=sharp2&op_usm=1.75,0.3,2,0');"></div>
                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                 <h3 class="relative z-10 text-white font-bold text-xl uppercase tracking-widest drop-shadow-md">Luxury SUV MPV</h3>
             </div>
 
             <!-- PRE MPV -->
             <div class="cat-card bg-black rounded-2xl h-40 relative overflow-hidden flex items-end justify-start p-4 cursor-pointer">
-                <img src="https://images.unsplash.com/photo-1609521263047-f8f205293f24?q=80&w=800&auto=format&fit=crop" alt="PRE MPV" class="absolute inset-0 w-full h-full object-cover opacity-60">
+                <img src="https://carro.id/blog/wp-content/uploads/2021/07/5d8e4161-2020-nissan-serena-facelift-japan-spec-0-e1619530135865.jpg" alt="PRE MPV" class="absolute inset-0 w-full h-full object-cover opacity-60">
                 <h3 class="relative z-10 text-white font-extrabold text-xl uppercase drop-shadow-md">PRE MPV</h3>
             </div>
             <!-- PRE SUV -->
             <div class="cat-card bg-black rounded-2xl h-40 relative overflow-hidden flex items-end justify-end p-4 cursor-pointer">
-                <img src="https://images.unsplash.com/photo-1503376713356-2e91244dce54?q=80&w=800&auto=format&fit=crop" alt="PRE SUV" class="absolute inset-0 w-full h-full object-cover opacity-60">
+                <img src="https://cdn.jdpower.com/JDPA_2020%20Lincoln%20Navigator%20Reserve%20Black%20Front%20View.jpg" alt="PRE SUV" class="absolute inset-0 w-full h-full object-cover opacity-60">
                 <h3 class="relative z-10 text-white font-extrabold text-xl uppercase drop-shadow-md">PRE SUV</h3>
             </div>
         </div>
