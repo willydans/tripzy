@@ -21,8 +21,18 @@ use App\Models\Car;
 Route::middleware('guest')->group(function () {
     
     // Landing Pages
-    Route::get('/', function () { return view('home'); })->name('home');
-    Route::get('/catalog', function () { return view('catalog'); })->name('catalog');
+    Route::get('/', function () { 
+        // Tarik maksimal 4 mobil yang statusnya 'Tersedia' buat dipajang di Home
+        $cars = Car::where('status', 'Tersedia')->take(4)->get();
+        return view('home', compact('cars')); 
+    })->name('home');
+
+    Route::get('/catalog', function () { 
+        // Tarik semua mobil buat halaman Catalog (Guest)
+        $cars = Car::where('status', 'Tersedia')->get();
+        return view('catalog', compact('cars')); 
+    })->name('catalog');
+    
     Route::get('/destination', function () { return view('destination'); })->name('destination');
     Route::get('/contact', function () { return view('contact'); })->name('contact');
 
@@ -47,17 +57,18 @@ Route::middleware('auth')->group(function () {
 
     // Catalog Khusus User (Narik Data Dinamis dari Database)
     Route::get('/dashboard/catalog', function () { 
-        // Ambil semua mobil yang statusnya 'Tersedia'
         $cars = Car::where('status', 'Tersedia')->get(); 
-        
-        // Lempar variabel $cars ke tampilan user_catalog
         return view('user_catalog', compact('cars')); 
     })->name('user.catalog');
 
     // Detail Mobil Khusus (Checkout)
     Route::get('/dashboard/catalog/{slug}', [App\Http\Controllers\CarController::class, 'show'])->name('user.car.detail');
+    Route::post('/dashboard/catalog/{slug}/checkout', [OrderController::class, 'store'])->name('user.checkout.process');
+    
+    // ROUTE UNTUK HALAMAN PAYMENT (QRIS)
+    Route::get('/dashboard/payment/{id}', [OrderController::class, 'payment'])->name('user.payment');
 
-    // 👇 ROUTE UNTUK HALAMAN DESTINATION USER 👇
+    // ROUTE UNTUK HALAMAN DESTINATION USER
     Route::get('/dashboard/destination', function () {
         return view('user_destination');
     })->name('user.destination');
@@ -66,11 +77,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/orders', [OrderController::class, 'index'])->name('user.orders');
     Route::post('/orders/{id}/cancel', [OrderController::class, 'cancel'])->name('user.orders.cancel');
     
+    // 👇 INI RUTENYA BUAT PROSES TOMBOL "PAYMENT NOW" 👇
+    Route::post('/orders/{id}/pay', [OrderController::class, 'pay'])->name('user.orders.pay'); 
+    
     // ROUTE UNTUK USER PROFILE
     Route::get('/profile', [ProfileController::class, 'edit'])->name('user.profile');
     Route::put('/profile', [ProfileController::class, 'update'])->name('user.profile.update');
     
-    // Proses Logout (Bisa dipakai barengan sama admin)
+    // Proses Logout
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 });

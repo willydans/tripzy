@@ -9,12 +9,15 @@ class Booking extends Model
 {
     use HasFactory;
 
+    // Izinkan semua kolom diisi massal kecuali 'id' (Nggak perlu pakai $fillable lagi)
     protected $guarded = ['id'];
 
-    // Casting agar tipe data gampang dikelola oleh Laravel (contoh pakai fungsi format() tanggal)
+    // Casting agar tipe data gampang dikelola oleh Laravel
     protected $casts = [
-        'start_date' => 'date',
-        'end_date' => 'date',
+        'start_date'  => 'date',
+        'end_date'    => 'date',
+        'duration'    => 'integer', // 👈 Tambahan biar dijamin masuk sbg angka
+        'total_price' => 'integer', // 👈 Tambahan biar dijamin masuk sbg angka
         'with_driver' => 'boolean',
         'verified_at' => 'datetime',
     ];

@@ -5,25 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tripzy - Drive Into the Beauty of Lampung</title>
     
-    <!-- Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Google Fonts: Poppins untuk kesan modern -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- FontAwesome untuk Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         body { font-family: 'Poppins', sans-serif; background-color: #F0F4FC; }
         
-        /* Custom Gradient untuk Hero Section */
         .hero-gradient {
             background: linear-gradient(180deg, #3A62A6 0%, #7A9FE0 50%, #F0F4FC 100%);
             position: relative;
         }
         
-        /* Grid pattern tipis di belakang */
         .hero-gradient::before {
             content: '';
             position: absolute;
@@ -38,40 +31,35 @@
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            /* Tambahan biar sticky 👇 */
             position: fixed;
             top: 20px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 100;
-            width: 80%; /* Lebarnya menyesuaikan */
+            width: 80%; 
             box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
 <body class="text-gray-800 overflow-x-hidden">
 
-    <!-- HERO SECTION & NAVBAR -->
     <div class="hero-gradient min-h-[90vh] flex flex-col relative overflow-hidden">
         
-        <!-- Navbar -->
         <nav class="glass-nav rounded-full px-8 py-4 flex justify-between items-center text-white transition-all">
             <h1 class="text-2xl font-bold italic tracking-wider"><a href="{{ route('home') }}">Tripzy</a></h1>
             
             <div class="hidden md:flex space-x-8 font-medium">
-                <a href="{{ route('home') }}" class="text-blue-200 hover:text-white transition drop-shadow-md">Home</a>
+                <a href="{{ route('home') }}" class="text-blue-200 hover:text-white transition drop-shadow-md border-b-2 border-blue-200 pb-1">Home</a>
                 <a href="{{ route('catalog') }}" class="hover:text-blue-200 transition">Catalog</a>
                 <a href="{{ route('contact') }}" class="hover:text-blue-200 transition">Contact</a>
                 <a href="{{ route('destination') }}" class="hover:text-blue-200 transition">Destination</a>
             </div>
 
-            <!-- Tombol Sign In (Logout & Auth logic dihapus sesuai request) -->
             <a href="{{ route('login') }}" class="bg-gray-900 bg-opacity-40 hover:bg-opacity-60 border border-gray-500 px-6 py-2 rounded-full font-medium flex items-center gap-2 transition text-white">
                 Sign In <i class="fa-solid fa-arrow-up-right-from-square text-sm"></i>
             </a>
         </nav>
 
-        <!-- Hero Content -->
         <div class="relative z-10 flex-grow flex flex-col justify-center items-center text-center px-4 mt-20">
             <h1 class="text-4xl md:text-6xl font-bold text-white leading-tight mb-6 tracking-wide drop-shadow-md">
                 Drive Into the Beauty<br>of Lampung
@@ -80,22 +68,20 @@
                 Start your journey with comfort and freedom as you explore Lampung at your own pace. With reliable vehicles and an easy booking process, every destination from beaches to hidden gems becomes closer, more practical, and more enjoyable.
             </p>
             <div class="flex space-x-4">
-                <button class="glass-nav text-white px-8 py-3 rounded-full hover:bg-white hover:text-blue-600 transition flex items-center gap-2" style="position: relative; top: 0; left: 0; transform: none; width: auto;">
+                <a href="{{ route('login') }}" class="glass-nav text-white px-8 py-3 rounded-full hover:bg-white hover:text-blue-600 transition flex items-center gap-2" style="position: relative; top: 0; left: 0; transform: none; width: auto;">
                     Book Now <i class="fa-solid fa-arrow-right"></i>
-                </button>
-                <button class="glass-nav text-white px-8 py-3 rounded-full hover:bg-white hover:text-blue-600 transition flex items-center gap-2" style="position: relative; top: 0; left: 0; transform: none; width: auto;">
+                </a>
+                <a href="{{ route('login') }}" class="glass-nav text-white px-8 py-3 rounded-full hover:bg-white hover:text-blue-600 transition flex items-center gap-2" style="position: relative; top: 0; left: 0; transform: none; width: auto;">
                     Looking Catalog <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                </button>
+                </a>
             </div>
         </div>
     </div>
 
-    <!-- WHY CHOOSE TRIPZY SECTION -->
     <div class="max-w-6xl mx-auto px-4 py-20">
         <h2 class="text-3xl font-bold text-center text-[#4A6EB0] mb-12">Why Choose Tripzy?</h2>
         
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <!-- Card 1 -->
             <div class="bg-[#C5D6F5] p-6 rounded-2xl relative overflow-hidden shadow-sm">
                 <span class="absolute top-2 right-4 text-5xl font-bold text-white opacity-40">01</span>
                 <div class="w-12 h-12 bg-gray-600 text-white rounded-full flex items-center justify-center text-xl mb-4 relative z-10">
@@ -105,7 +91,6 @@
                 <p class="text-sm text-gray-600 relative z-10">Customer service is ready to assist you anytime.</p>
             </div>
 
-            <!-- Card 2 -->
             <div class="bg-[#C5D6F5] p-6 rounded-2xl relative overflow-hidden shadow-sm">
                 <span class="absolute top-2 right-4 text-5xl font-bold text-white opacity-40">02</span>
                 <div class="w-12 h-12 bg-gray-600 text-white rounded-full flex items-center justify-center text-xl mb-4 relative z-10">
@@ -115,7 +100,6 @@
                 <p class="text-sm text-gray-600 relative z-10">Travel with peace of mind with complete protection</p>
             </div>
 
-            <!-- Card 3 -->
             <div class="bg-[#C5D6F5] p-6 rounded-2xl relative overflow-hidden shadow-sm">
                 <span class="absolute top-2 right-4 text-5xl font-bold text-white opacity-40">03</span>
                 <div class="w-12 h-12 bg-gray-600 text-white rounded-full flex items-center justify-center text-xl mb-4 relative z-10">
@@ -125,7 +109,6 @@
                 <p class="text-sm text-gray-600 relative z-10">Fast reservation without complicated steps</p>
             </div>
 
-            <!-- Card 4 -->
             <div class="bg-[#C5D6F5] p-6 rounded-2xl relative overflow-hidden shadow-sm">
                 <span class="absolute top-2 right-4 text-5xl font-bold text-white opacity-40">04</span>
                 <div class="w-12 h-12 bg-gray-600 text-white rounded-full flex items-center justify-center text-xl mb-4 relative z-10">
@@ -137,7 +120,6 @@
         </div>
     </div>
 
-    <!-- CATALOG SECTION -->
     <div class="max-w-6xl mx-auto px-4 pb-24">
         <div class="text-center mb-12">
             <h2 class="text-4xl font-bold text-[#4A6EB0] mb-4">Best Car Selection</h2>
@@ -145,94 +127,41 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <!-- Car Card: Avanza -->
-            <div class="bg-gradient-to-b from-[#B8CDEE] to-[#DEE8F6] rounded-3xl p-8 shadow-lg flex flex-col relative">
-                <img src="{{ asset('images/avanza.png') }}" alt="Toyota Avanza" class="w-full object-contain h-48 mb-6 drop-shadow-xl z-10">
-                <h3 class="text-xl font-bold text-gray-800 uppercase">Toyota Avanza</h3>
-                <div class="text-2xl font-bold text-gray-900 my-2">Rp 300.000 <span class="text-sm font-normal text-gray-600">/day</span></div>
-                
-                <div class="flex justify-between items-end mt-4">
-                    <div class="space-y-2 text-xs font-medium text-gray-700">
-                        <p><i class="fa-solid fa-users w-5"></i> 7 Passengers</p>
-                        <p><i class="fa-solid fa-gear w-5"></i> Manual</p>
-                        <p><i class="fa-solid fa-gas-pump w-5"></i> Fuel</p>
+            @if(isset($cars) && $cars->count() > 0)
+                @foreach($cars as $car)
+                <div class="bg-gradient-to-b from-[#B8CDEE] to-[#DEE8F6] rounded-3xl p-8 shadow-lg flex flex-col relative transition transform hover:-translate-y-1 hover:shadow-xl">
+                    <span class="absolute top-6 left-6 bg-white/50 text-[#3B5B92] px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider backdrop-blur-sm z-20">{{ $car->category }}</span>
+                    
+                    <img src="{{ asset($car->image_path) }}" alt="{{ $car->name }}" class="w-full object-contain h-48 mb-6 drop-shadow-xl z-10">
+                    <h3 class="text-xl font-bold text-gray-800 uppercase truncate">{{ $car->name }}</h3>
+                    <div class="text-2xl font-bold text-gray-900 my-2">Rp {{ number_format($car->price_per_day, 0, ',', '.') }} <span class="text-sm font-normal text-gray-600">/day</span></div>
+                    
+                    <div class="flex justify-between items-end mt-4">
+                        <div class="space-y-2 text-xs font-medium text-gray-700">
+                            <p><i class="fa-solid fa-users w-5"></i> {{ $car->seats }} Passengers</p>
+                            <p><i class="fa-solid fa-gear w-5"></i> {{ $car->transmission }}</p>
+                            <p><i class="fa-solid fa-gas-pump w-5"></i> {{ $car->fuel_type }}</p>
+                        </div>
+                        <img src="{{ asset($car->image_path) }}" alt="Mini" class="w-24 h-16 object-contain drop-shadow-md">
                     </div>
-                    <!-- Mini Thumbnail -->
-                    <img src="{{ asset('images/avanza.png') }}" alt="Mini" class="w-24 drop-shadow-md">
+                    
+                    <a href="{{ route('login') }}" class="mt-8 w-full py-3 rounded-full bg-gradient-to-r from-white/40 to-white/20 border border-white/50 text-[#3B5B92] font-bold shadow-sm hover:bg-white/50 transition text-center inline-block">
+                        Book Now
+                    </a>
                 </div>
-                
-                <button class="mt-8 w-full py-3 rounded-full bg-gradient-to-r from-white/40 to-white/20 border border-white/50 text-[#3B5B92] font-bold shadow-sm hover:bg-white/50 transition">
-                    Book Now
-                </button>
-            </div>
-
-            <!-- Car Card: Brio -->
-            <div class="bg-gradient-to-b from-[#B8CDEE] to-[#DEE8F6] rounded-3xl p-8 shadow-lg flex flex-col relative">
-                <img src="{{ asset('images/brio.png') }}" alt="Honda Brio" class="w-full object-contain h-48 mb-6 drop-shadow-xl z-10">
-                <h3 class="text-xl font-bold text-gray-800 uppercase">Honda Brio</h3>
-                <div class="text-2xl font-bold text-gray-900 my-2">Rp 250.000 <span class="text-sm font-normal text-gray-600">/day</span></div>
-                
-                <div class="flex justify-between items-end mt-4">
-                    <div class="space-y-2 text-xs font-medium text-gray-700">
-                        <p><i class="fa-solid fa-users w-5"></i> 5 Passengers</p>
-                        <p><i class="fa-solid fa-gear w-5"></i> Automatic</p>
-                        <p><i class="fa-solid fa-gas-pump w-5"></i> Fuel</p>
-                    </div>
-                    <img src="{{ asset('images/brio.png') }}" alt="Mini" class="w-24 drop-shadow-md">
+                @endforeach
+            @else
+                <div class="col-span-1 md:col-span-2 text-center text-gray-500 py-10 bg-white/50 rounded-2xl">
+                    <i class="fa-solid fa-car-side text-4xl mb-3 opacity-50"></i>
+                    <p>Mobil belum tersedia di katalog.</p>
                 </div>
-                
-                <button class="mt-8 w-full py-3 rounded-full bg-gradient-to-r from-white/40 to-white/20 border border-white/50 text-[#3B5B92] font-bold shadow-sm hover:bg-white/50 transition">
-                    Book Now
-                </button>
-            </div>
-
-            <!-- Car Card: Fortuner -->
-            <div class="bg-gradient-to-b from-[#B8CDEE] to-[#DEE8F6] rounded-3xl p-8 shadow-lg flex flex-col relative">
-                <img src="{{ asset('images/fortuner.png') }}" alt="Toyota Fortuner" class="w-full object-contain h-48 mb-6 drop-shadow-xl z-10">
-                <h3 class="text-xl font-bold text-gray-800 uppercase">Toyota Fortuner</h3>
-                <div class="text-2xl font-bold text-gray-900 my-2">Rp 800.000 <span class="text-sm font-normal text-gray-600">/day</span></div>
-                
-                <div class="flex justify-between items-end mt-4">
-                    <div class="space-y-2 text-xs font-medium text-gray-700">
-                        <p><i class="fa-solid fa-users w-5"></i> 7 Passengers</p>
-                        <p><i class="fa-solid fa-gear w-5"></i> Automatic</p>
-                        <p><i class="fa-solid fa-gas-pump w-5"></i> Diesel</p>
-                    </div>
-                    <img src="{{ asset('images/fortuner.png') }}" alt="Mini" class="w-24 drop-shadow-md">
-                </div>
-                
-                <button class="mt-8 w-full py-3 rounded-full bg-gradient-to-r from-white/40 to-white/20 border border-white/50 text-[#3B5B92] font-bold shadow-sm hover:bg-white/50 transition">
-                    Book Now
-                </button>
-            </div>
-
-            <!-- Car Card: Innova -->
-            <div class="bg-gradient-to-b from-[#B8CDEE] to-[#DEE8F6] rounded-3xl p-8 shadow-lg flex flex-col relative">
-                <img src="{{ asset('images/innova.png') }}" alt="Toyota Innova" class="w-full object-contain h-48 mb-6 drop-shadow-xl z-10">
-                <h3 class="text-xl font-bold text-gray-800 uppercase">Toyota Innova</h3>
-                <div class="text-2xl font-bold text-gray-900 my-2">Rp 500.000 <span class="text-sm font-normal text-gray-600">/day</span></div>
-                
-                <div class="flex justify-between items-end mt-4">
-                    <div class="space-y-2 text-xs font-medium text-gray-700">
-                        <p><i class="fa-solid fa-users w-5"></i> 5 Passengers</p>
-                        <p><i class="fa-solid fa-gear w-5"></i> Manual</p>
-                        <p><i class="fa-solid fa-gas-pump w-5"></i> Bensin</p>
-                    </div>
-                    <img src="{{ asset('images/innova.png') }}" alt="Mini" class="w-24 drop-shadow-md">
-                </div>
-                
-                <button class="mt-8 w-full py-3 rounded-full bg-gradient-to-r from-white/40 to-white/20 border border-white/50 text-[#3B5B92] font-bold shadow-sm hover:bg-white/50 transition">
-                    Book Now
-                </button>
-            </div>
+            @endif
         </div>
     </div>
 
-    <!-- FOOTER SECTION -->
     <footer class="bg-gradient-to-t from-[#5978B4] to-[#A9BFE4] text-white py-12">
         <div class="max-w-6xl mx-auto px-4 flex flex-col md:flex-row justify-between items-start">
             
-            <!-- Left: Brand & Socials -->
             <div class="mb-8 md:mb-0">
                 <h2 class="text-5xl font-bold italic text-[#3B5B92] mb-6 drop-shadow-sm">Tripzy</h2>
                 <div class="flex space-x-4 text-2xl text-white">
@@ -243,7 +172,6 @@
                 </div>
             </div>
 
-            <!-- Right: Contact Info -->
             <div class="md:w-1/2">
                 <h3 class="text-xl font-bold text-[#3B5B92] mb-4">Contact Us</h3>
                 <ul class="space-y-4 text-sm font-medium">

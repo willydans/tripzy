@@ -21,7 +21,6 @@
 </head>
 <body class="flex h-screen overflow-hidden text-[#1C2C4A]">
 
-    <!-- Notifikasi Toast -->
     @if(session('success') || session('error'))
     <div id="toastNotification" class="fixed inset-0 flex items-center justify-center z-[100] bg-black/40 backdrop-blur-sm transition-opacity duration-300">
         <div class="{{ session('error') ? 'bg-red-500' : 'bg-[#5C72A6]' }} rounded-2xl p-8 flex flex-col items-center shadow-2xl relative w-96">
@@ -41,7 +40,6 @@
     </script>
     @endif
 
-    <!-- SIDEBAR -->
     <aside class="w-64 sidebar-bg text-white flex flex-col h-full shadow-lg z-20 shrink-0">
         <div class="p-6">
             <h1 class="text-3xl font-bold italic drop-shadow-md mb-1">Tripzy</h1>
@@ -56,10 +54,8 @@
         </nav>
     </aside>
 
-    <!-- MAIN CONTENT -->
     <div class="flex-grow flex flex-col h-full overflow-y-auto relative bg-[#EBF1FA]">
         
-        <!-- TOPBAR -->
         <header class="topbar-bg px-8 py-5 flex justify-between items-center sticky top-0 z-10">
             <div class="relative w-96">
                 <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-white"></i>
@@ -81,11 +77,9 @@
             </div>
         </header>
 
-        <!-- DASHBOARD CONTENT -->
         <main class="p-8 pb-24">
             <h2 class="text-2xl font-bold text-[#4A6EB0] mb-6">Dashboard</h2>
 
-            <!-- 5 SUMMARY CARDS -->
             <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
                 <div class="bg-white rounded-2xl p-6 card-shadow">
                     <h3 class="text-[#4A6EB0] font-bold text-sm mb-2">Total Bookings</h3>
@@ -109,7 +103,6 @@
                 </div>
             </div>
 
-            <!-- FILTER & SEARCH -->
             <div class="flex gap-4 mb-6">
                 <div class="relative flex-grow max-w-md">
                     <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-[#8CA1C4]"></i>
@@ -120,7 +113,6 @@
                 </select>
             </div>
 
-            <!-- TABLE -->
             <div class="bg-white rounded-2xl card-shadow overflow-hidden border border-gray-100 p-2">
                 <table class="w-full text-left border-collapse">
                     <thead>
@@ -190,9 +182,6 @@
         </main>
     </div>
 
-    <!-- ================= MODALS ================= -->
-
-    <!-- MODAL DETAIL BOOKING -->
     <div id="detailModal" class="fixed inset-0 z-[60] flex items-center justify-center opacity-0 pointer-events-none modal">
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="toggleModal('detailModal')"></div>
         <div class="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto relative shadow-2xl p-8 z-10">
@@ -201,7 +190,6 @@
                 <button onclick="toggleModal('detailModal')" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
 
-            <!-- Car Box -->
             <div class="bg-[#F4F7FC] rounded-xl p-4 flex items-center justify-between mb-6">
                 <div class="flex items-center gap-4">
                     <div class="bg-white p-2 rounded-lg shadow-sm"><img id="mdl_car_img" src="" class="w-12 h-8 object-contain"></div>
@@ -213,7 +201,6 @@
                 <span id="mdl_status_badge" class="px-4 py-1 text-[10px] rounded-full font-bold shadow-sm text-white"></span>
             </div>
 
-            <!-- Booking Details List -->
             <div class="space-y-3 text-sm mb-6 border-b border-gray-100 pb-6">
                 <div class="flex justify-between"><span class="text-gray-500">Booking Code</span><span id="mdl_code" class="font-bold text-[#4A6EB0]"></span></div>
                 <div class="flex justify-between"><span class="text-gray-500">User</span><span id="mdl_user" class="font-bold text-[#1C2C4A]"></span></div>
@@ -226,7 +213,6 @@
                 <div class="flex justify-between"><span class="text-gray-500">Verified</span><span id="mdl_verified" class="font-bold text-[#1C2C4A]"></span></div>
             </div>
 
-            <!-- Document Images -->
             <div class="space-y-6 mb-8">
                 <div class="flex justify-between items-start gap-4">
                     <span class="text-gray-500 text-sm">KTP</span>
@@ -246,14 +232,11 @@
                 </div>
             </div>
 
-            <!-- Dynamic Buttons Box -->
             <div id="mdl_action_buttons" class="flex justify-between gap-4">
-                <!-- Diisi otomatis lewat Javascript -->
-            </div>
+                </div>
         </div>
     </div>
 
-    <!-- MODAL PICKUP CONFIRMATION -->
     <div id="pickupModal" class="fixed inset-0 z-[60] flex items-center justify-center opacity-0 pointer-events-none modal">
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="toggleModal('pickupModal')"></div>
         <div class="bg-white rounded-2xl w-full max-w-md relative shadow-2xl p-8 z-10">
@@ -306,7 +289,6 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT -->
     <script>
         function toggleModal(modalID) {
             const modal = document.getElementById(modalID);
@@ -339,12 +321,12 @@
             document.getElementById('mdl_total').innerText = formatRupiah(booking.total_price);
             document.getElementById('mdl_verified').innerText = booking.verified_at ? booking.verified_at.replace('T', ', ').substring(0,19) : '-';
 
-            // Set Images
-            document.getElementById('mdl_doc_ktp').src = `/${booking.doc_ktp}`;
-            document.getElementById('mdl_doc_sim').src = `/${booking.doc_sim}`;
-            document.getElementById('mdl_doc_selfie').src = `/${booking.doc_selfie}`;
+            // Set Images - UDAH DITAMBAHIN /storage/ BIAR NAMPIL!
+            document.getElementById('mdl_doc_ktp').src = `/storage/${booking.doc_ktp}`;
+            document.getElementById('mdl_doc_sim').src = `/storage/${booking.doc_sim}`;
+            document.getElementById('mdl_doc_selfie').src = `/storage/${booking.doc_selfie}`;
             if(booking.doc_passport) {
-                document.getElementById('mdl_doc_passport').src = `/${booking.doc_passport}`;
+                document.getElementById('mdl_doc_passport').src = `/storage/${booking.doc_passport}`;
                 document.getElementById('passport_wrapper').classList.remove('hidden');
             } else {
                 document.getElementById('passport_wrapper').classList.add('hidden');

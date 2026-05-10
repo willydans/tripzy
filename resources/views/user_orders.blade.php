@@ -17,18 +17,15 @@
             overflow-x: hidden;
         }
 
-        /* Nav Pill Styling */
         .nav-pill {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        /* Tab Styling */
         .tab-btn { transition: all 0.3s ease; }
         .tab-active { background: rgba(255, 255, 255, 0.1); border-color: rgba(255,255,255,0.3); }
         
-        /* Outline Text for Empty State */
         .text-outline {
             color: transparent;
             -webkit-text-stroke: 2px white;
@@ -36,14 +33,13 @@
             letter-spacing: 2px;
         }
 
-        /* Modal Background */
-        .modal-card { background-color: #7183A6; } /* Grayish Blue like design */
+        .modal-card { background-color: #7183A6; } 
     </style>
 </head>
 <body class="flex flex-col min-h-screen">
 
     <!-- NAVBAR -->
-    <nav class="pt-6 px-8 flex justify-between items-center mb-12 max-w-7xl mx-auto w-full">
+    <nav class="pt-6 px-8 flex justify-between items-center mb-12 max-w-7xl mx-auto w-full relative z-50">
         <div class="nav-pill rounded-full px-6 py-3 flex space-x-6 text-sm font-bold tracking-wider uppercase text-white">
             <a href="{{ route('dashboard') }}" class="hover:text-blue-300 transition">Home</a>
             <a href="{{ route('user.catalog') }}" class="hover:text-blue-300 transition">Catalog</a>
@@ -51,29 +47,65 @@
             <a href="{{ route('user.orders') }}" class="text-blue-300 transition border-b-2 border-blue-300 pb-1">Orders</a>
         </div>
         <div class="flex space-x-4 items-center">
-           <a href="{{ route('user.profile') }}" class="w-10 h-10 rounded-full nav-pill flex items-center justify-center hover:bg-white/20 transition text-white overflow-hidden relative border border-white/20">
-    @if(Auth::user()->profile_photo)
-        <!-- Kalau ada foto, tampilkan fotonya nutupin buletan -->
-        <img src="{{ asset('storage/' . Auth::user()->profile_photo) }}" class="w-full h-full object-cover absolute inset-0">
-    @else
-        <!-- Kalau gak ada foto, tampilkan icon orang -->
-        <i class="fa-solid fa-user text-lg"></i>
-    @endif
-</a>
-            <button class="w-10 h-10 rounded-full nav-pill flex items-center justify-center hover:bg-white/20 transition text-white">
-                <i class="fa-solid fa-bell text-lg"></i>
-            </button>
+            
+            <!-- Icon User Dinamis -->
+            <a href="{{ route('user.profile') }}" class="w-10 h-10 rounded-full nav-pill flex items-center justify-center hover:bg-white/20 transition text-white overflow-hidden relative border border-white/20">
+                @if(Auth::check() && Auth::user()->profile_photo)
+                    <img src="{{ asset('storage/' . Auth::user()->profile_photo) }}" class="w-full h-full object-cover absolute inset-0">
+                @else
+                    <i class="fa-solid fa-user text-lg"></i>
+                @endif
+            </a>
+            
+            <!-- BELL ICON & NOTIFICATION DROPDOWN -->
+            <div class="relative inline-block text-left">
+                <button onclick="toggleNotif()" id="bellButton" class="w-10 h-10 rounded-full nav-pill flex items-center justify-center hover:bg-white/20 transition text-white relative z-50">
+                    <i class="fa-solid fa-bell text-lg"></i>
+                    @php
+                        $recentBookings = \App\Models\Booking::where('user_id', Auth::id())
+                                            ->orderBy('created_at', 'desc')
+                                            ->take(5)
+                                            ->get();
+                    @endphp
+                    @if($recentBookings->count() > 0)
+                        <span class="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-[#1A1F36]"></span>
+                    @endif
+                </button>
+
+                <div id="notifPanel" class="hidden absolute right-0 mt-4 w-80 bg-[#7A8CA5] rounded-2xl shadow-2xl z-40 transform transition-all duration-300 opacity-0 scale-95 origin-top-right">
+                    <div class="absolute -top-2 right-4 w-5 h-5 bg-[#7A8CA5] transform rotate-45 rounded-sm"></div>
+                    <div class="relative z-10 p-6">
+                        <h3 class="text-white font-bebas tracking-widest text-lg mb-5 uppercase">NOTIFICATION</h3>
+                        <div class="space-y-5 max-h-64 overflow-y-auto pr-2" style="scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.5) transparent;">
+                            @forelse($recentBookings as $notif)
+                                @php
+                                    $days = \Carbon\Carbon::parse($notif->start_date)->diffInDays($notif->end_date) + 1;
+                                @endphp
+                                <div class="flex items-start gap-4">
+                                    <div class="w-3 h-3 bg-white rounded-full mt-1.5 flex-shrink-0 shadow-sm"></div>
+                                    <div>
+                                        <h4 class="text-white text-sm font-bold tracking-wider uppercase drop-shadow-sm">BOOKING BERHASIL</h4>
+                                        <p class="text-gray-100 text-xs mt-1 leading-relaxed">Berhasil melakukan booking selama {{ $days }} hari</p>
+                                    </div>
+                                </div>
+                            @empty
+                                <p class="text-gray-200 text-xs text-center italic mt-2">Belum ada aktivitas booking.</p>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </nav>
 
     <!-- MAIN CONTENT -->
-    <main class="flex-grow max-w-7xl mx-auto px-4 lg:px-8 w-full mb-20">
+    <main class="flex-grow max-w-7xl mx-auto px-4 lg:px-8 w-full mb-20 relative z-10">
         
         <h1 class="text-5xl font-bold font-bebas tracking-wide uppercase mb-2">MY BOOKINGS</h1>
         <p class="text-gray-300 text-sm mb-10">Easily access your booking details and status anytime.</p>
 
         @if($bookings->isEmpty())
-            <!-- EMPTY STATE (JIKA BELUM ADA BOOKING SAMA SEKALI) -->
+            <!-- EMPTY STATE -->
             <div class="flex flex-col items-center justify-center mt-32 mb-32 text-center">
                 <h2 class="text-4xl font-bebas tracking-widest uppercase mb-4">START YOUR JOURNEY BY</h2>
                 <h1 class="text-7xl text-outline uppercase tracking-widest">BOOKING YOUR FIRST TRIP</h1>
@@ -138,12 +170,22 @@
                                 <!-- Action Buttons -->
                                 <div class="flex gap-3">
                                     @if($booking->status == 'Pending Payment')
+                                        <!-- Tombol Cancel -->
                                         <form action="{{ route('user.orders.cancel', $booking->id) }}" method="POST">
                                             @csrf
                                             <button type="submit" class="bg-[#D34D4D] hover:bg-red-600 text-white px-6 py-2 rounded-full font-bold transition shadow-md">Cancel Booking</button>
                                         </form>
-                                        <button class="bg-[#2A344D] hover:bg-[#1A1F36] text-white px-6 py-2 rounded-full font-bold transition shadow-md border border-gray-500">Payment Now</button>
+                                        
+                                        <!-- 👇 INI TOMBOL PAYMENT NOW YANG BARU 👇 -->
+                                        <form action="{{ route('user.orders.pay', $booking->id) }}" method="POST">
+                                            @csrf
+                                            <button type="submit" class="bg-[#2A344D] hover:bg-[#1A1F36] text-white px-6 py-2 rounded-full font-bold transition shadow-md border border-gray-500">
+                                                Payment Now
+                                            </button>
+                                        </form>
+                                        
                                     @else
+                                        <!-- Tombol Details buat status selain Pending -->
                                         <button onclick="openDetailModal({{ json_encode($booking) }}, {{ json_encode($booking->car) }})" class="bg-[#2A344D] hover:bg-[#1A1F36] text-white px-8 py-2 rounded-full font-bold transition shadow-md border border-gray-500">Details</button>
                                     @endif
                                 </div>
@@ -152,7 +194,6 @@
                     </div>
                 @endforeach
                 
-                <!-- Notice jika tab kosong -->
                 <div id="empty-tab-msg" class="hidden text-center text-gray-400 mt-12 mb-12">
                     <p class="text-xl">Tidak ada booking di kategori ini.</p>
                 </div>
@@ -280,9 +321,29 @@
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
-        // Logika Tab Filter
+        function toggleNotif() {
+            const panel = document.getElementById('notifPanel');
+            if (panel.classList.contains('hidden')) {
+                panel.classList.remove('hidden');
+                setTimeout(() => { panel.classList.remove('opacity-0', 'scale-95'); }, 10);
+            } else {
+                panel.classList.add('opacity-0', 'scale-95');
+                setTimeout(() => { panel.classList.add('hidden'); }, 300); 
+            }
+        }
+
+        document.addEventListener('click', function(event) {
+            const panel = document.getElementById('notifPanel');
+            const bellBtn = document.getElementById('bellButton');
+            if (panel && bellBtn && !panel.contains(event.target) && !bellBtn.contains(event.target)) {
+                if (!panel.classList.contains('hidden')) {
+                    panel.classList.add('opacity-0', 'scale-95');
+                    setTimeout(() => { panel.classList.add('hidden'); }, 300);
+                }
+            }
+        });
+
         function filterTabs(status) {
-            // Update Active Style di Button Tab
             const buttons = document.querySelectorAll('.tab-btn');
             buttons.forEach(btn => {
                 if(btn.innerText.trim() === status) {
@@ -292,7 +353,6 @@
                 }
             });
 
-            // Filter Card berdasarkan data-status
             let visibleCount = 0;
             const cards = document.querySelectorAll('.booking-card');
             cards.forEach(card => {
@@ -304,7 +364,6 @@
                 }
             });
 
-            // Tampilkan pesan kosong jika tidak ada data di tab tsb
             const emptyMsg = document.getElementById('empty-tab-msg');
             if(visibleCount === 0) {
                 emptyMsg.classList.remove('hidden');
@@ -313,31 +372,25 @@
             }
         }
 
-        // Jalankan filter otomatis di tab pertama pas halaman diload (jika ada data)
         document.addEventListener("DOMContentLoaded", () => {
             const container = document.getElementById('booking-container');
             if(container) { filterTabs('Pending Payment'); }
         });
 
-        // Logika Format Rupiah
         function formatRupiah(angka) {
             return 'RP' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         }
 
-        // Ambil nama file dari path buat ditampilkan di dokumen
         function getFileName(path) {
             if(!path) return '-';
             return path.split('\\').pop().split('/').pop();
         }
 
-        // Buka Modal & Isi Data Dinamis
         function openDetailModal(booking, car) {
-            // Car Info
             document.getElementById('mdl_car_img').src = `/${car.image_path}`;
             document.getElementById('mdl_car_category').innerText = car.category;
             document.getElementById('mdl_car_name').innerText = car.name;
             
-            // Badges Spesifikasi Mobil
             const specsHTML = `
                 <span class="border border-white/40 bg-white/5 rounded px-3 py-1 text-xs font-semibold tracking-wider">${car.year}</span>
                 <span class="border border-white/40 bg-white/5 rounded px-3 py-1 text-xs font-semibold tracking-wider uppercase">${car.transmission}</span>
@@ -348,11 +401,9 @@
             `;
             document.getElementById('mdl_specs_container').innerHTML = specsHTML;
 
-            // Booking Details Grid
             const startDate = new Date(booking.start_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
             const endDate = new Date(booking.end_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
             
-            // Hitung Hari
             const diffTime = Math.abs(new Date(booking.end_date) - new Date(booking.start_date));
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; 
 
@@ -360,28 +411,23 @@
             document.getElementById('mdl_duration').innerText = `${diffDays} DAY`;
             document.getElementById('mdl_plat').innerText = car.license_plate;
 
-            // Renter
             document.getElementById('mdl_renter_name').innerText = booking.renter_name;
             document.getElementById('mdl_renter_phone').innerText = booking.renter_phone;
             document.getElementById('mdl_renter_id').innerText = booking.renter_id_number;
 
-            // Docs
             document.getElementById('doc_ktp').innerText = getFileName(booking.doc_ktp);
             document.getElementById('doc_sim').innerText = getFileName(booking.doc_sim);
             document.getElementById('doc_selfie').innerText = getFileName(booking.doc_selfie);
 
-            // Calculation Details
             const baseTotal = car.price_per_day * diffDays;
             document.getElementById('mdl_price_calc').innerText = `${formatRupiah(car.price_per_day)} X ${diffDays} DAY`;
             document.getElementById('mdl_price_subtotal').innerText = formatRupiah(baseTotal);
             
-            // Cek driver cost dari selisih total_price dgn baseTotal
             const driverCost = booking.total_price - baseTotal;
             document.getElementById('mdl_driver_cost').innerText = driverCost > 0 ? formatRupiah(driverCost) : 'RP.0';
             
             document.getElementById('mdl_total_amount').innerText = formatRupiah(booking.total_price);
             
-            // Payment Status Color
             const payStatElement = document.getElementById('mdl_payment_status');
             if(booking.status == 'History') {
                 payStatElement.innerText = 'COMPLETED';
@@ -397,7 +443,6 @@
                 payStatElement.className = 'font-bold uppercase tracking-wider text-orange-400';
             }
 
-            // Show Modal
             const modal = document.getElementById('detailModal');
             modal.classList.remove('opacity-0', 'pointer-events-none');
             document.body.classList.add('overflow-hidden');

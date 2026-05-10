@@ -26,11 +26,11 @@
         .icon-circle { width: 300px; height: 300px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 120px; color: white; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
         .bg-success-circle { background-color: #34D399; } 
         .bg-error-circle { background-color: #EF4444; } 
+        
     </style>
 </head>
 <body class="flex flex-col min-h-screen relative" id="body-container">
 
-    <!-- OVERLAY STATUS (SUCCESS / ERROR) -->
     @if(session('success') || session('error'))
     <div id="statusOverlay" class="fixed inset-0 z-[100] bg-[#313A53]/80 flex items-center justify-center status-overlay">
         <div class="icon-circle {{ session('success') ? 'bg-success-circle' : 'bg-error-circle' }} animate-bounce">
@@ -45,8 +45,7 @@
     </script>
     @endif
 
-    <!-- NAVBAR -->
-    <nav class="pt-6 px-8 flex justify-between items-center mb-12 max-w-7xl mx-auto w-full">
+    <nav class="pt-6 px-8 flex justify-between items-center mb-12 max-w-7xl mx-auto w-full relative z-50">
         <div class="nav-pill rounded-full px-6 py-3 flex space-x-6 text-sm font-bold tracking-wider uppercase text-white">
             <a href="{{ route('dashboard') }}" class="hover:text-blue-300 transition">Home</a>
             <a href="{{ route('user.catalog') }}" class="hover:text-blue-300 transition">Catalog</a>
@@ -54,19 +53,65 @@
             <a href="{{ route('user.orders') }}" class="hover:text-blue-300 transition">Orders</a>
         </div>
         <div class="flex space-x-4 items-center">
-            <a href="{{ route('user.profile') }}" class="w-10 h-10 rounded-full nav-pill flex items-center justify-center bg-white/20 text-white">
-                <i class="fa-solid fa-user text-lg"></i>
+            
+            <a href="{{ route('user.profile') }}" class="w-10 h-10 rounded-full nav-pill flex items-center justify-center hover:bg-white/20 transition text-white overflow-hidden relative border border-white/20">
+                @if(Auth::check() && Auth::user()->profile_photo)
+                    <img src="{{ asset('storage/' . Auth::user()->profile_photo) }}" class="w-full h-full object-cover absolute inset-0">
+                @else
+                    <i class="fa-solid fa-user text-lg"></i>
+                @endif
             </a>
-            <button class="w-10 h-10 rounded-full nav-pill flex items-center justify-center hover:bg-white/20 transition text-white">
-                <i class="fa-solid fa-bell text-lg"></i>
-            </button>
+            
+            <div class="relative inline-block text-left">
+                <button onclick="toggleNotif()" id="bellButton" class="w-10 h-10 rounded-full nav-pill flex items-center justify-center hover:bg-white/20 transition text-white relative z-50">
+                    <i class="fa-solid fa-bell text-lg"></i>
+                    
+                    @php
+                        $recentBookings = \App\Models\Booking::where('user_id', Auth::id())
+                                            ->orderBy('created_at', 'desc')
+                                            ->take(5)
+                                            ->get();
+                    @endphp
+                    
+                    @if($recentBookings->count() > 0)
+                        <span class="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-[#1A1F36]"></span>
+                    @endif
+                </button>
+
+                <div id="notifPanel" class="hidden absolute right-0 mt-4 w-80 bg-[#7A8CA5] rounded-2xl shadow-2xl z-40 transform transition-all duration-300 opacity-0 scale-95 origin-top-right">
+                    <div class="absolute -top-2 right-4 w-5 h-5 bg-[#7A8CA5] transform rotate-45 rounded-sm"></div>
+                    
+                    <div class="relative z-10 p-6">
+                        <h3 class="text-white font-bebas tracking-widest text-lg mb-5 uppercase">NOTIFICATION</h3>
+                        <div class="space-y-5 max-h-64 overflow-y-auto pr-2" style="scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.5) transparent;">
+                            @forelse($recentBookings as $notif)
+                                @php
+                                    $days = \Carbon\Carbon::parse($notif->start_date)->diffInDays($notif->end_date) + 1;
+                                @endphp
+                                <div class="flex items-start gap-4">
+                                    <div class="w-3 h-3 bg-white rounded-full mt-1.5 flex-shrink-0 shadow-sm"></div>
+                                    <div>
+                                        <h4 class="text-white text-sm font-bold tracking-wider uppercase drop-shadow-sm">BOOKING BERHASIL</h4>
+                                        <p class="text-gray-100 text-xs mt-1 leading-relaxed">Berhasil melakukan booking selama {{ $days }} hari</p>
+                                    </div>
+                                </div>
+                            @empty
+                                <p class="text-gray-200 text-xs text-center italic mt-2">Belum ada aktivitas booking.</p>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </nav>
 
-    <!-- MAIN CONTENT -->
     <main class="flex-grow max-w-7xl mx-auto px-4 lg:px-8 w-full mb-20 relative">
         
-        <!-- JIKA ADA ERROR VALIDASI (Biar ketahuan kenapa nggak mau disimpen) -->
+        <form id="logoutForm" action="{{ route('logout') }}" method="POST" class="hidden">
+            @csrf
+        </form>
+
         @if ($errors->any())
             <div class="bg-red-500/80 text-white p-4 rounded-xl mb-6">
                 <p class="font-bold mb-2"><i class="fa-solid fa-triangle-exclamation"></i> Gagal menyimpan data:</p>
@@ -78,15 +123,12 @@
             </div>
         @endif
 
-        <!-- FORM (Tambahin enctype biar bisa upload gambar) -->
         <form action="{{ route('user.profile.update') }}" method="POST" id="profileForm" enctype="multipart/form-data">
             @csrf
             @method('PUT')
 
-            <!-- HEADER PROFILE -->
-            <div class="card-bg rounded-3xl relative mt-20 p-8 pt-16 flex justify-between items-start mb-12 shadow-lg">
+            <div class="card-bg rounded-3xl relative mt-20 p-8 pt-16 flex justify-between items-start mb-12 shadow-lg z-10">
                 
-                <!-- Foto Profil (Sekarang bisa diklik pas mode edit) -->
                 <div class="absolute -top-20 left-12 w-40 h-40 rounded-full border-8 border-[#313A53] overflow-hidden bg-gray-300 shadow-xl flex items-center justify-center group relative">
                     @if($user->profile_photo)
                         <img id="photoPreview" src="{{ asset('storage/' . $user->profile_photo) }}" class="w-full h-full object-cover">
@@ -94,7 +136,6 @@
                         <img id="photoPreview" src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&background=1C2C4A&color=fff&size=200" class="w-full h-full object-cover">
                     @endif
 
-                    <!-- Lapisan hitam + icon kamera (Cuma muncul pas Edit Mode) -->
                     <label id="photoLabel" class="absolute inset-0 bg-black/60 hidden flex-col items-center justify-center cursor-pointer text-white opacity-0 group-hover:opacity-100 transition">
                         <i class="fa-solid fa-camera text-2xl mb-1"></i>
                         <span class="text-[10px] font-bold uppercase text-center">Ganti<br>Foto</span>
@@ -107,18 +148,22 @@
                     <p class="text-xl text-white mt-1">{{ $user->email }}</p>
                 </div>
 
-                <!-- Toggle Buttons -->
-                <button type="button" id="btnEdit" onclick="toggleEdit()" class="text-white font-bebas text-2xl tracking-widest uppercase border-b-2 border-white hover:text-gray-200">
-                    EDIT PROFILE
-                </button>
-                <button type="button" id="btnBatal" onclick="toggleEdit()" class="hidden text-white font-bebas text-2xl tracking-widest uppercase border-b-2 border-white hover:text-gray-200">
-                    BATAL
-                </button>
+                <div class="flex items-center gap-6">
+                    <button type="button" onclick="document.getElementById('logoutForm').submit();" class="text-white font-bebas text-2xl tracking-widest uppercase border-b-2 border-white hover:text-gray-200 cursor-pointer">
+                        LOGOUT
+                    </button>
+
+                    <button type="button" id="btnEdit" onclick="toggleEdit()" class="text-white font-bebas text-2xl tracking-widest uppercase border-b-2 border-white hover:text-gray-200">
+                        EDIT PROFILE
+                    </button>
+                    <button type="button" id="btnBatal" onclick="toggleEdit()" class="hidden text-white font-bebas text-2xl tracking-widest uppercase border-b-2 border-white hover:text-gray-200">
+                        BATAL
+                    </button>
+                </div>
             </div>
 
             <h2 class="text-2xl font-bebas tracking-widest uppercase mb-6 ml-4">PERSONAL INFORMATION</h2>
 
-            <!-- INFO BOX -->
             <div class="card-bg rounded-3xl p-10 grid grid-cols-1 md:grid-cols-3 gap-y-8 gap-x-12 shadow-lg relative pb-24">
                 
                 <div>
@@ -160,7 +205,6 @@
                     <input type="date" name="tanggal_lahir" value="{{ old('tanggal_lahir', $user->tanggal_lahir ? $user->tanggal_lahir->format('Y-m-d') : '') }}" class="profile-input" readonly>
                 </div>
 
-                <!-- Tombol Simpan -->
                 <div class="absolute bottom-10 right-10 hidden" id="saveBtnContainer">
                     <button type="submit" class="bg-[#85A6A1] hover:bg-[#688581] text-white px-8 py-3 rounded-full font-bold transition shadow-md tracking-wider uppercase">
                         simpan perubahan
@@ -172,7 +216,6 @@
 
     </main>
 
-    <!-- FOOTER (Tetap sama) -->
     <footer class="mt-auto border-t border-gray-600 pt-10 pb-8 bg-[#313A53]">
         <div class="max-w-7xl mx-auto px-4 lg:px-8 flex flex-col md:flex-row justify-between items-start">
             <div class="mb-8 md:mb-0">
@@ -196,46 +239,61 @@
         </div>
     </footer>
 
-    <!-- LOGIKA JAVASCRIPT -->
     <script>
+        // Logika Dropdown Notifikasi
+        function toggleNotif() {
+            const panel = document.getElementById('notifPanel');
+            if (panel.classList.contains('hidden')) {
+                panel.classList.remove('hidden');
+                setTimeout(() => { panel.classList.remove('opacity-0', 'scale-95'); }, 10);
+            } else {
+                panel.classList.add('opacity-0', 'scale-95');
+                setTimeout(() => { panel.classList.add('hidden'); }, 300); 
+            }
+        }
+
+        // Tutup notif saat klik di luar area
+        document.addEventListener('click', function(event) {
+            const panel = document.getElementById('notifPanel');
+            const bellBtn = document.getElementById('bellButton');
+            if (panel && bellBtn && !panel.contains(event.target) && !bellBtn.contains(event.target)) {
+                if (!panel.classList.contains('hidden')) {
+                    panel.classList.add('opacity-0', 'scale-95');
+                    setTimeout(() => { panel.classList.add('hidden'); }, 300);
+                }
+            }
+        });
+
+        // Logika Edit Profile
         function toggleEdit() {
             const body = document.getElementById('body-container');
             const inputs = document.querySelectorAll('.profile-input');
             const btnEdit = document.getElementById('btnEdit');
             const btnBatal = document.getElementById('btnBatal');
             const saveBtnContainer = document.getElementById('saveBtnContainer');
-            const photoLabel = document.getElementById('photoLabel'); // Tombol upload foto
+            const photoLabel = document.getElementById('photoLabel'); 
             
             const isEditing = body.classList.contains('edit-mode');
 
             if (isEditing) {
-                // Cancel Edit
                 body.classList.remove('edit-mode');
                 btnEdit.classList.remove('hidden');
                 btnBatal.classList.add('hidden');
                 saveBtnContainer.classList.add('hidden');
-                
-                // Sembunyikan fitur ganti foto
                 photoLabel.classList.add('hidden');
                 photoLabel.classList.remove('flex');
-                
                 inputs.forEach(input => { input.setAttribute('readonly', true); });
             } else {
-                // Aktifkan Edit
                 body.classList.add('edit-mode');
                 btnEdit.classList.add('hidden');
                 btnBatal.classList.remove('hidden');
                 saveBtnContainer.classList.remove('hidden');
-                
-                // Munculin fitur ganti foto
                 photoLabel.classList.remove('hidden');
                 photoLabel.classList.add('flex');
-                
                 inputs.forEach(input => { input.removeAttribute('readonly'); });
             }
         }
 
-        // Fitur Preview Foto sebelum di-save
         function previewImage(event) {
             const reader = new FileReader();
             reader.onload = function(){
