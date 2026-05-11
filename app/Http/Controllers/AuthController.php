@@ -24,11 +24,31 @@ class AuthController extends Controller
         ]);
 
         if (Auth::attempt($credentials)) {
+            $user = Auth::user();
+
+            // 👇 CEK STATUS AKUN DI SINI 👇
+            if ($user->status === 'Pending') {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                
+                // Pesan formal untuk status Pending
+                return back()->with('error', 'Akun Anda sedang dalam proses verifikasi oleh Admin. Harap menunggu.');
+            } elseif ($user->status === 'Blacklist') {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                
+                // Pesan formal untuk status Blacklist
+                return back()->with('error', 'Akun Anda telah diblokir. Anda tidak dapat mengakses sistem.');
+            }
+
+            // Kalau lolos dan statusnya Active, lanjut bikin session
             $request->session()->regenerate();
             
             // 👇 LOGIKA RBAC (Role-Based Access Control) 👇
             // Kalo yang login role-nya admin, lempar ke Dashboard Admin
-            if (Auth::user()->role === 'admin') {
+            if ($user->role === 'admin') {
                 return redirect()->route('admin.dashboard');
             }
             
@@ -36,8 +56,9 @@ class AuthController extends Controller
             return redirect()->route('dashboard'); 
         }
 
+        // 👇 PESAN ERROR FORMAL 👇
         return back()->withErrors([
-            'email' => 'Email atau password salah bre.',
+            'email' => 'Email atau password yang Anda masukkan salah.',
         ])->onlyInput('email');
     }
 
@@ -65,12 +86,12 @@ class AuthController extends Controller
             'nomor_hp' => $request->nomor_hp,
             'tanggal_lahir' => $request->tanggal_lahir,
             'jenis_kelamin' => $request->jenis_kelamin,
-            'password' => Hash::make($request->password), // Password wajib di-hash
-            // Note: role otomatis jadi 'user' karena kita udah set default 'user' di migration database
+            'password' => Hash::make($request->password), 
+            // Note: role otomatis jadi 'user' dan status otomatis 'Pending' dari migration database
         ]);
 
-        // Kalo sukses register, lempar ke halaman login
-        return redirect()->route('login')->with('success', 'Registrasi berhasil! Silakan login.');
+        // Pesan sukses formal
+        return redirect()->route('login')->with('success', 'Registrasi berhasil. Akun Anda sedang menunggu verifikasi dari Admin.');
     }
 
     // Proses Logout
@@ -80,7 +101,7 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         
-        // 👇 Habis logout, balikin dia ke landing page (home)
+        // Habis logout, balikin dia ke landing page (home)
         return redirect()->route('home');
     }
 }

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\Booking; // 👈 Import relasi Booking
 
 class User extends Authenticatable
 {
@@ -31,6 +32,7 @@ class User extends Authenticatable
         'jenis_sim',
         'masa_berlaku_sim',
         'profile_photo',
+        'status', // 👈 Tambahan field status biar bisa diupdate
     ];
 
     /**
@@ -54,4 +56,23 @@ class User extends Authenticatable
         'tanggal_lahir' => 'date',
         'masa_berlaku_sim' => 'date',
     ];
+
+    // 👈 Tambahan fungsi relasi: Satu user bisa punya banyak booking
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class);
+    }
+
+    // 👈 TAMBAHAN FUNGSI BOOT: Biar Admin otomatis Active tanpa nunggu verifikasi
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($user) {
+            // Kalau role-nya admin, paksa statusnya jadi Active dari awal
+            if ($user->role === 'admin') {
+                $user->status = 'Active';
+            }
+        });
+    }
 }

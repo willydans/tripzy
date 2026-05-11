@@ -23,6 +23,9 @@ return new class extends Migration
             $table->date('tanggal_lahir')->nullable();
             $table->string('jenis_kelamin')->nullable();
             
+            // 👈 TAMBAHAN KOLOM STATUS (Pending, Active, Blacklist)
+            $table->string('status')->default('Pending');
+            
             $table->rememberToken();
             $table->timestamps();
         });

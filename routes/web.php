@@ -5,6 +5,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController; 
 use App\Http\Controllers\AdminCarController; 
 use App\Http\Controllers\AdminBookingController; 
+use App\Http\Controllers\AdminTransactionController; 
+use App\Http\Controllers\AdminUserController; // 👈 Import controller baru buat User Management
 use App\Http\Controllers\OrderController; 
 use App\Http\Controllers\ProfileController; 
 use App\Models\Car; 
@@ -110,4 +112,13 @@ Route::middleware(['auth', \App\Http\Middleware\IsAdmin::class])->group(function
     Route::post('/admin/bookings/{id}/pickup', [AdminBookingController::class, 'pickup'])->name('admin.bookings.pickup');
     Route::post('/admin/bookings/{id}/return', [AdminBookingController::class, 'returnCar'])->name('admin.bookings.return');
     Route::post('/admin/bookings/{id}/cancel', [AdminBookingController::class, 'cancel'])->name('admin.bookings.cancel');
+
+    // ROUTE UNTUK TRANSACTIONS ADMIN 
+    Route::get('/admin/transactions', [AdminTransactionController::class, 'index'])->name('admin.transactions.index');
+    Route::get('/admin/transactions/export', [AdminTransactionController::class, 'export'])->name('admin.transactions.export');
+
+    // 👈 ROUTE BARU BUAT USER MANAGEMENT
+    Route::get('/admin/users', [AdminUserController::class, 'index'])->name('admin.users.index');
+    Route::post('/admin/users/{id}/verify', [AdminUserController::class, 'verify'])->name('admin.users.verify');
+    Route::post('/admin/users/{id}/blacklist', [AdminUserController::class, 'blacklist'])->name('admin.users.blacklist');
 });
