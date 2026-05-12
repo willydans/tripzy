@@ -19,26 +19,38 @@
 
         .nav-pill { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
         
-        /* Animasi Card Gallery */
+        /* Sembunyikan scrollbar untuk navigasi mobile */
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Animasi Card Gallery (Responsive) */
         .gallery-container {
             display: flex;
-            gap: 1rem;
-            height: 550px;
+            flex-direction: column; /* Vertikal di HP */
+            gap: 0.75rem;
+            height: 75vh; /* Tinggi menyesuaikan layar HP */
             width: 100%;
-            max-w: 7xl;
             margin: 0 auto;
+        }
+
+        @media (min-width: 768px) {
+            .gallery-container {
+                flex-direction: row; /* Horizontal di Laptop */
+                gap: 1rem;
+                height: 550px;
+            }
         }
 
         .dest-card {
             position: relative;
-            flex: 1; /* Awalnya kecil semua */
+            flex: 1; /* Awalnya bagi rata semua */
             border-radius: 1.5rem;
             overflow: hidden;
             cursor: pointer;
             transition: all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
-        .dest-card.active { flex: 5; }
+        .dest-card.active { flex: 6; } /* Pas diklik membesar */
 
         .overlay-unexpanded {
             position: absolute; inset: 0;
@@ -57,10 +69,15 @@
         .dest-card.active .overlay-expanded { opacity: 1; }
 
         .text-vertical {
-            writing-mode: vertical-rl;
-            transform: rotate(180deg);
-            text-orientation: mixed;
             white-space: nowrap;
+        }
+
+        @media (min-width: 768px) {
+            .text-vertical {
+                writing-mode: vertical-rl;
+                transform: rotate(180deg);
+                text-orientation: mixed;
+            }
         }
 
         .content-unexpanded { transition: opacity 0.4s ease, transform 0.4s ease; }
@@ -71,72 +88,138 @@
             pointer-events: none;
         }
 
-        .dest-card.active .content-unexpanded { opacity: 0; transform: translateY(-20px); pointer-events: none; }
+        /* Animasi Transisi Unexpanded */
+        .dest-card.active .content-unexpanded { opacity: 0; pointer-events: none; }
+        @media (max-width: 767px) {
+            .dest-card.active .content-unexpanded { transform: translateX(-20px); }
+        }
+        @media (min-width: 768px) {
+            .dest-card.active .content-unexpanded { transform: translateY(-20px); }
+        }
+
         .dest-card.active .content-expanded { opacity: 1; transform: translateY(0); pointer-events: auto; }
     </style>
 </head>
 <body class="flex flex-col min-h-screen">
 
-    <!-- NAVBAR (Z-50 biar notif ga ketutup card) -->
-    <nav class="pt-6 px-8 flex justify-between items-center mb-12 max-w-7xl mx-auto w-full relative z-50">
-        <div class="nav-pill rounded-full px-6 py-3 flex space-x-6 text-sm font-bold tracking-wider uppercase text-white">
-            <a href="{{ route('dashboard') }}" class="hover:text-blue-300 transition">Home</a>
-            <a href="{{ route('user.catalog') }}" class="hover:text-blue-300 transition">Catalog</a>
-            <a href="{{ route('user.destination') }}" class="text-blue-300 transition border-b-2 border-blue-300 pb-1">Destination</a>
-            <a href="{{ route('user.orders') }}" class="hover:text-blue-300 transition">Orders</a>
-        </div>
-
-        <div class="flex space-x-4 items-center">
-            <!-- Icon User Dinamis -->
-            <a href="{{ route('user.profile') }}" class="w-10 h-10 rounded-full nav-pill flex items-center justify-center hover:bg-white/20 transition text-white overflow-hidden relative border border-white/20">
-                @if(Auth::check() && Auth::user()->profile_photo)
-                    <img src="{{ asset('storage/' . Auth::user()->profile_photo) }}" class="w-full h-full object-cover absolute inset-0">
-                @else
-                    <i class="fa-solid fa-user text-lg"></i>
-                @endif
-            </a>
-
-            <!-- BELL ICON & NOTIFICATION DROPDOWN -->
-            <div class="relative inline-block text-left">
-                <button onclick="toggleNotif()" id="bellButton" class="w-10 h-10 rounded-full nav-pill flex items-center justify-center hover:bg-white/20 transition text-white relative z-50">
-                    <i class="fa-solid fa-bell text-lg"></i>
-                    @php
-                        $recentBookings = \App\Models\Booking::where('user_id', Auth::id())->orderBy('created_at', 'desc')->take(5)->get();
-                    @endphp
-                    @if($recentBookings->count() > 0)
-                        <span class="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-[#1A1F36]"></span>
+    <nav class="pt-6 px-4 md:px-8 flex flex-col md:flex-row justify-between items-center gap-4 md:gap-0 mb-8 md:mb-12 max-w-7xl mx-auto w-full relative z-50">
+        
+        <div class="flex justify-between items-center w-full md:w-auto md:order-2">
+            <h1 class="text-3xl font-bebas tracking-widest md:hidden text-[#7A9FE0]">TRIPZY</h1>
+            
+            <div class="flex space-x-4 items-center">
+                <a href="{{ route('user.profile') }}" class="w-10 h-10 rounded-full nav-pill flex items-center justify-center hover:bg-white/20 transition text-white overflow-hidden relative border border-white/20">
+                    @if(Auth::check() && Auth::user()->profile_photo)
+                        <img src="{{ asset('storage/' . Auth::user()->profile_photo) }}" class="w-full h-full object-cover absolute inset-0">
+                    @else
+                        <i class="fa-solid fa-user text-lg"></i>
                     @endif
-                </button>
+                </a>
+                
+                <div class="relative inline-block text-left">
+                    @php
+                        $now = \Carbon\Carbon::now();
+                        $activeBookings = \App\Models\Booking::with('car')
+                                            ->where('user_id', Auth::id())
+                                            ->whereNotIn('status', ['Cancelled'])
+                                            ->orderBy('created_at', 'desc')
+                                            ->get();
 
-                <div id="notifPanel" class="hidden absolute right-0 mt-4 w-80 bg-[#7A8CA5] rounded-2xl shadow-2xl z-40 transform transition-all duration-300 opacity-0 scale-95 origin-top-right">
-                    <div class="absolute -top-2 right-4 w-5 h-5 bg-[#7A8CA5] transform rotate-45 rounded-sm"></div>
-                    <div class="relative z-10 p-6">
-                        <h3 class="text-white font-bebas tracking-widest text-lg mb-5 uppercase">NOTIFICATION</h3>
-                        <div class="space-y-5 max-h-64 overflow-y-auto pr-2" style="scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.5) transparent;">
-                            @forelse($recentBookings as $notif)
-                                @php $days = \Carbon\Carbon::parse($notif->start_date)->diffInDays($notif->end_date) + 1; @endphp
-                                <div class="flex items-start gap-4">
-                                    <div class="w-3 h-3 bg-white rounded-full mt-1.5 flex-shrink-0 shadow-sm"></div>
-                                    <div>
-                                        <h4 class="text-white text-sm font-bold tracking-wider uppercase drop-shadow-sm">BOOKING BERHASIL</h4>
-                                        <p class="text-gray-100 text-xs mt-1 leading-relaxed">Berhasil melakukan booking selama {{ $days }} hari</p>
+                        $notifications = collect();
+
+                        foreach($activeBookings as $b) {
+                            $pickupTime = $b->pickup_time ?? '00:00:00';
+                            $start = \Carbon\Carbon::parse($b->start_date)->format('Y-m-d');
+                            $end = \Carbon\Carbon::parse($b->end_date)->format('Y-m-d');
+
+                            $pickupDateTime = \Carbon\Carbon::parse($start . ' ' . $pickupTime);
+                            $returnDateTime = \Carbon\Carbon::parse($end . ' ' . $pickupTime);
+
+                            if (in_array($b->status, ['Ongoing', 'Paid'])) {
+                                if ($now->greaterThan($returnDateTime)) {
+                                    $daysLate = $now->diffInDays($returnDateTime);
+                                    if ($daysLate > 0) {
+                                        $notifications->push([
+                                            'title' => 'TELAT MENGEMBALIKAN',
+                                            'msg' => "Booking {$b->booking_code}: Anda telat mengembalikan mobil {$b->car->name} selama {$daysLate} hari. Segera kembalikan!",
+                                            'color' => 'bg-red-500'
+                                        ]);
+                                    } else {
+                                        $notifications->push([
+                                            'title' => 'WAKTU HABIS',
+                                            'msg' => "Booking {$b->booking_code}: Durasi rental {$b->car->name} habis hari ini. Silahkan kembalikan tepat waktu.",
+                                            'color' => 'bg-orange-400'
+                                        ]);
+                                    }
+                                } elseif ($now->greaterThanOrEqualTo($pickupDateTime) && $now->lessThan($returnDateTime)) {
+                                    $notifications->push([
+                                        'title' => 'WAKTU PENGAMBILAN',
+                                        'msg' => "Booking {$b->booking_code}: Waktu rental dimulai! Silahkan ambil mobil {$b->car->name} di perental sekarang.",
+                                        'color' => 'bg-green-400'
+                                    ]);
+                                } else {
+                                    $daysToPickup = $now->diffInDays($pickupDateTime);
+                                    $notifications->push([
+                                        'title' => 'BOOKING BERHASIL',
+                                        'msg' => "Booking {$b->booking_code}: Pemesanan {$b->car->name} berhasil. Jadwal ambil mobil {$daysToPickup} hari lagi.",
+                                        'color' => 'bg-white'
+                                    ]);
+                                }
+                            } elseif ($b->status == 'Pending Payment') {
+                                $notifications->push([
+                                    'title' => 'MENUNGGU PEMBAYARAN',
+                                    'msg' => "Booking {$b->booking_code} menunggu pembayaran. Segera selesaikan dengan metode QRIS.",
+                                    'color' => 'bg-blue-400'
+                                ]);
+                            }
+                        }
+                    @endphp
+
+                    <button onclick="toggleNotif()" id="bellButton" class="w-10 h-10 rounded-full nav-pill flex items-center justify-center hover:bg-white/20 transition text-white relative z-50 cursor-pointer">
+                        <i class="fa-solid fa-bell text-lg"></i>
+                        @if($notifications->count() > 0)
+                            <span class="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-[#1A1F36]"></span>
+                        @endif
+                    </button>
+
+                    <div id="notifPanel" class="hidden absolute right-0 mt-4 w-[85vw] max-w-xs sm:w-80 bg-[#7A8CA5] rounded-2xl shadow-2xl z-40 transform transition-all duration-300 opacity-0 scale-95 origin-top-right border border-white/10">
+                        <div class="absolute -top-2 right-4 w-5 h-5 bg-[#7A8CA5] transform rotate-45 rounded-sm border-t border-l border-white/10"></div>
+                        <div class="relative z-10 p-5 md:p-6">
+                            <h3 class="text-white font-bebas tracking-widest text-lg mb-4 uppercase">NOTIFICATION</h3>
+                            <div class="space-y-4 max-h-64 overflow-y-auto pr-2" style="scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.5) transparent;">
+                                @forelse($notifications->take(5) as $notif)
+                                    <div class="flex items-start gap-3 md:gap-4">
+                                        <div class="w-3 h-3 {{ $notif['color'] }} rounded-full mt-1.5 flex-shrink-0 shadow-sm border border-white/20"></div>
+                                        <div>
+                                            <h4 class="text-white text-sm font-bold tracking-wider uppercase drop-shadow-sm">{{ $notif['title'] }}</h4>
+                                            <p class="text-gray-100 text-[11px] md:text-xs mt-1 leading-relaxed">{{ $notif['msg'] }}</p>
+                                        </div>
                                     </div>
-                                </div>
-                            @empty
-                                <p class="text-gray-200 text-xs text-center italic mt-2">Belum ada aktivitas booking.</p>
-                            @endforelse
+                                @empty
+                                    <div class="text-center py-4">
+                                        <i class="fa-regular fa-bell-slash text-2xl text-white/50 mb-2"></i>
+                                        <p class="text-gray-200 text-xs italic">Belum ada notifikasi rental.</p>
+                                    </div>
+                                @endforelse
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <div class="nav-pill w-full md:w-auto overflow-x-auto hide-scroll rounded-full px-4 md:px-6 py-3 flex space-x-4 md:space-x-6 text-xs md:text-sm font-bold tracking-wider uppercase text-white md:order-1 whitespace-nowrap">
+            <a href="{{ route('dashboard') }}" class="hover:text-blue-300 transition">Home</a>
+            <a href="{{ route('user.catalog') }}" class="hover:text-blue-300 transition">Catalog</a>
+            <a href="{{ route('user.destination') }}" class="text-blue-300 transition border-b-2 border-blue-300 pb-1">Destination</a>
+            <a href="{{ route('user.orders') }}" class="hover:text-blue-300 transition">Orders</a>
+        </div>
     </nav>
 
-    <!-- MAIN CONTENT -->
     <main class="flex-grow max-w-7xl mx-auto px-4 lg:px-8 w-full mb-24 relative z-10">
-        <div class="text-center mb-12">
-            <p class="text-sm font-bold tracking-widest uppercase text-gray-300 mb-2">RECOMENDATION DESTINATION</p>
-            <h1 class="text-6xl font-bebas tracking-widest uppercase">TOP TRAVEL SPOTS WORTH VISITING</h1>
+        <div class="text-center mb-8 md:mb-12">
+            <p class="text-xs md:text-sm font-bold tracking-widest uppercase text-gray-300 mb-2">RECOMENDATION DESTINATION</p>
+            <h1 class="text-4xl md:text-6xl font-bebas tracking-widest uppercase leading-tight">TOP TRAVEL SPOTS WORTH VISITING</h1>
         </div>
 
         @php
@@ -151,33 +234,45 @@
         @endphp
 
         <div class="gallery-container">
-            @foreach($destinations as $dest)
-                <div class="dest-card" onclick="toggleCard(this)">
+            @foreach($destinations as $index => $dest)
+                <div class="dest-card {{ $index == 0 ? 'active' : '' }}" onclick="toggleCard(this)">
                     <img src="{{ $dest['img'] }}" class="absolute inset-0 w-full h-full object-cover">
                     <div class="overlay-unexpanded"></div>
                     <div class="overlay-expanded"></div>
-                    <div class="content-unexpanded absolute inset-0 flex flex-col items-center justify-between py-10">
-                        <div class="w-[2px] h-16 bg-white/70"></div>
-                        <h3 class="text-vertical font-bebas text-3xl tracking-widest text-white drop-shadow-md flex-grow flex items-center justify-center my-4">{{ $dest['title'] }}</h3>
-                        <h2 class="font-bebas text-4xl text-white drop-shadow-md">{{ $dest['id'] }}</h2>
+                    
+                    <div class="content-unexpanded absolute inset-0 flex flex-row md:flex-col items-center justify-between py-4 px-6 md:py-10 md:px-0">
+                        <div class="hidden md:block w-[2px] h-16 bg-white/70"></div>
+                        <h3 class="text-vertical font-bebas text-xl md:text-3xl tracking-widest text-white drop-shadow-md flex-grow flex items-center justify-center md:my-4">{{ $dest['title'] }}</h3>
+                        <h2 class="font-bebas text-2xl md:text-4xl text-white drop-shadow-md">{{ $dest['id'] }}</h2>
                     </div>
-                    <div class="content-expanded absolute inset-x-0 bottom-0 p-8 flex flex-col justify-end h-full">
-                        <h2 class="font-bebas text-4xl tracking-widest text-white mb-2 drop-shadow-lg">{{ $dest['title'] }}</h2>
-                        <p class="text-xs text-gray-200 leading-relaxed font-medium drop-shadow-md max-w-xl line-clamp-4">{{ $dest['desc'] }}</p>
+                    
+                    <div class="content-expanded absolute inset-x-0 bottom-0 p-5 md:p-8 flex flex-col justify-end h-full">
+                        <h2 class="font-bebas text-3xl md:text-4xl tracking-widest text-white mb-2 drop-shadow-lg">{{ $dest['title'] }}</h2>
+                        <p class="text-[11px] md:text-xs text-gray-200 leading-relaxed font-medium drop-shadow-md max-w-xl line-clamp-3 md:line-clamp-4">{{ $dest['desc'] }}</p>
                     </div>
                 </div>
             @endforeach
         </div>
     </main>
 
-    <!-- FOOTER -->
-    <footer class="mt-auto border-t border-gray-600 pt-10 pb-8 bg-[#1A1F36]">
-        <div class="max-w-7xl mx-auto px-4 lg:px-8 flex flex-col md:flex-row justify-between items-start">
-            <div class="mb-8 md:mb-0"><h2 class="text-5xl font-bold font-bebas tracking-widest text-[#7A9FE0] mb-4">Tripzy</h2></div>
+    <footer class="mt-auto border-t border-[#323A56] pt-10 pb-8 bg-[#171B2D]">
+        <div class="max-w-7xl mx-auto px-4 lg:px-8 flex flex-col md:flex-row justify-between items-start gap-8 md:gap-0">
+            <div class="w-full md:w-auto">
+                <h2 class="text-4xl md:text-5xl font-bold font-bebas tracking-widest text-[#7A9FE0] mb-4">Tripzy</h2>
+                <div class="flex space-x-4 text-2xl text-gray-400">
+                    <i class="fa-brands fa-discord hover:text-white cursor-pointer transition"></i>
+                    <i class="fa-brands fa-whatsapp hover:text-white cursor-pointer transition"></i>
+                    <i class="fa-brands fa-telegram hover:text-white cursor-pointer transition"></i>
+                    <i class="fa-brands fa-instagram hover:text-white cursor-pointer transition"></i>
+                </div>
+            </div>
             <div class="w-full md:w-1/3">
                 <h3 class="text-xl font-bold text-[#7A9FE0] mb-4">Contact Us</h3>
                 <ul class="space-y-4 text-xs font-medium text-gray-400">
-                    <li class="flex items-start gap-3"><i class="fa-solid fa-location-dot mt-1 text-[#7A9FE0]"></i><span>Jl. Prof. Dr. Ir. Sumantri Brojonegoro No.1, Gedong Meneng, Kec. Rajabasa, Bandar Lampung 35141</span></li>
+                    <li class="flex items-start gap-3"><i class="fa-solid fa-location-dot mt-1 text-[#7A9FE0] shrink-0"></i><span>Jl. Prof. Dr. Ir. Sumantri Brojonegoro No.1, Gedong Meneng, Kec. Rajabasa, Bandar Lampung 35141</span></li>
+                    <li class="flex items-center gap-3"><i class="fa-solid fa-phone text-[#7A9FE0] shrink-0"></i><span>+6285278139801</span></li>
+                    <li class="flex items-center gap-3"><i class="fa-solid fa-envelope text-[#7A9FE0] shrink-0"></i><span>tripzy@gmail.com</span></li>
+                    <li class="flex items-start gap-3"><i class="fa-solid fa-clock mt-1 text-[#7A9FE0] shrink-0"></i><span>Senin - Minggu<br>24 Jam</span></li>
                 </ul>
             </div>
         </div>
@@ -206,9 +301,12 @@
             }
         });
 
+        // Script Gallery Accordion
         function toggleCard(clickedCard) {
             const isActive = clickedCard.classList.contains('active');
+            // Hapus class active dari semua card
             document.querySelectorAll('.dest-card').forEach(card => card.classList.remove('active'));
+            // Tambahkan class active ke card yang diklik (jika sebelumnya tidak aktif)
             if (!isActive) clickedCard.classList.add('active');
         }
     </script>

@@ -24,16 +24,25 @@
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #B2C5E5; border-radius: 10px; }
+
+        /* Sembunyikan scrollbar untuk elemen tertentu di mobile */
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="flex h-screen text-[#1C2C4A] overflow-hidden">
+<body class="flex h-screen text-[#1C2C4A] overflow-hidden relative">
 
-    <aside class="w-64 sidebar-bg text-white flex flex-col h-full shadow-lg z-20 shrink-0">
-        <div class="p-6">
-            <h1 class="text-3xl font-bold italic drop-shadow-md mb-1">Tripzy</h1>
-            <p class="text-sm font-medium opacity-90">Admin Panel</p>
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/50 z-30 hidden md:hidden transition-opacity opacity-0" onclick="toggleSidebar()"></div>
+
+    <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 sidebar-bg text-white flex flex-col h-full shadow-2xl md:shadow-lg z-40 transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300 shrink-0">
+        <div class="p-6 flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold italic drop-shadow-md mb-1">Tripzy</h1>
+                <p class="text-sm font-medium opacity-90">Admin Panel</p>
+            </div>
+            <button onclick="toggleSidebar()" class="md:hidden text-white text-2xl hover:text-gray-200"><i class="fa-solid fa-xmark"></i></button>
         </div>
-        <nav class="mt-6 flex-grow flex flex-col gap-2 px-4">
+        <nav class="mt-2 md:mt-6 flex-grow flex flex-col gap-2 px-4 overflow-y-auto hide-scroll pb-4">
             <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-lg font-medium opacity-80 transition">Dashboard</a>
             <a href="{{ route('admin.bookings.index') }}" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-lg font-medium opacity-80 transition">Booking Verification</a>
             <a href="{{ route('admin.catalog.index') }}" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-lg font-medium opacity-80 transition">Manage Catalog</a>
@@ -44,67 +53,78 @@
 
     <div class="flex-grow flex flex-col h-full overflow-y-auto relative bg-[#EBF1FA]">
         
-        <header class="topbar-bg px-8 py-5 flex justify-between items-center sticky top-0 z-10">
-            <div class="relative w-96">
-                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-white"></i>
-                <input type="text" placeholder="Search...." class="w-full glass-search text-white placeholder-white rounded-full py-2.5 pl-12 pr-4 focus:outline-none focus:bg-white/30 transition shadow-inner">
+        <header class="topbar-bg px-4 md:px-8 py-4 md:py-5 flex justify-between items-center sticky top-0 z-20 shadow-sm md:shadow-none">
+            
+            <div class="flex items-center gap-3 md:gap-0">
+                <button onclick="toggleSidebar()" class="md:hidden text-[#4A6EB0] text-2xl focus:outline-none">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                
+                <div class="relative w-full max-w-[200px] md:max-w-xs lg:w-96 hidden sm:block">
+                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-white"></i>
+                    <input type="text" placeholder="Search...." class="w-full glass-search text-white placeholder-white rounded-full py-2 md:py-2.5 pl-10 md:pl-12 pr-4 focus:outline-none focus:bg-white/30 transition shadow-inner text-sm md:text-base">
+                </div>
             </div>
             
             <div class="flex items-center gap-4">
-                <div class="flex items-center gap-3 bg-white/60 px-4 py-2 rounded-full border border-white/80 backdrop-blur-sm shadow-sm text-[#1C2C4A]">
-                    <div class="w-10 h-10 bg-[#1C2C4A] rounded-full flex items-center justify-center text-white"><i class="fa-solid fa-user"></i></div>
-                    <div class="leading-tight">
-                        <h4 class="text-sm font-bold">{{ Auth::user()->name }}</h4>
-                        <p class="text-[10px] font-medium text-[#4A6EB0]">Super Admin</p>
+                <form action="{{ route('logout') }}" method="POST" class="m-0 hidden sm:block">
+                    @csrf
+                    <button type="submit" class="text-xs text-red-500 font-semibold hover:underline">Logout</button>
+                </form>
+                <div class="flex items-center gap-2 md:gap-3 bg-white/60 md:bg-white/40 px-3 md:px-4 py-1.5 md:py-2 rounded-full border border-white/80 backdrop-blur-sm shadow-sm text-[#1C2C4A]">
+                    <div class="w-8 h-8 md:w-10 md:h-10 bg-[#1C2C4A] rounded-full flex items-center justify-center text-white text-sm md:text-base"><i class="fa-solid fa-user"></i></div>
+                    <div class="leading-tight hidden sm:block">
+                        <h4 class="text-xs md:text-sm font-bold">{{ Auth::user()->name }}</h4>
+                        <p class="text-[9px] md:text-[10px] font-medium text-[#4A6EB0]">Super Admin</p>
                     </div>
+                    <form action="{{ route('logout') }}" method="POST" class="m-0 sm:hidden ml-2 border-l border-gray-300 pl-2">
+                        @csrf
+                        <button type="submit" class="text-[#1C2C4A]"><i class="fa-solid fa-right-from-bracket"></i></button>
+                    </form>
                 </div>
             </div>
         </header>
 
-        <main class="p-8 pb-24">
+        <main class="p-4 md:p-8 pb-24">
             
-            <h2 class="text-2xl font-bold text-[#4A6EB0] mb-6">Transactions</h2>
+            <h2 class="text-2xl md:text-3xl font-bold text-[#4A6EB0] mb-4 md:mb-6">Transactions</h2>
 
-            <div class="flex justify-between items-start mb-8">
-                <div class="bg-white rounded-2xl p-8 card-shadow text-center flex-grow max-w-xl mx-auto border-t-4 border-[#4A6EB0]">
-                    <h3 class="text-[#4A6EB0] font-bold text-lg mb-2">Transactions</h3>
-                    <h1 class="text-4xl md:text-5xl font-bebas tracking-wider text-[#4A6EB0]">RP {{ number_format($totalRevenue, 0, ',', '.') }}</h1>
+            <div class="flex flex-col lg:flex-row justify-between items-center mb-6 md:mb-8 gap-4 lg:gap-8">
+                <div class="bg-white rounded-2xl p-6 md:p-8 card-shadow text-center flex-grow w-full max-w-xl mx-auto lg:mx-0 border-t-4 border-[#4A6EB0]">
+                    <h3 class="text-[#4A6EB0] font-bold text-sm md:text-lg mb-1 md:mb-2">Total Revenue</h3>
+                    <h1 class="text-3xl sm:text-4xl md:text-5xl font-bebas tracking-wider text-[#4A6EB0] break-words">RP {{ number_format($totalRevenue, 0, ',', '.') }}</h1>
                 </div>
-                <a href="{{ route('admin.transactions.export') }}" class="bg-[#5C72A6] hover:bg-[#4A6EB0] text-white px-6 py-3 rounded-full font-bold shadow-md transition flex items-center gap-2 mt-4 ml-8 cursor-pointer">
-    <i class="fa-solid fa-download"></i> Export Report
-</a>
+                <a href="{{ route('admin.transactions.export') }}" class="w-full lg:w-auto bg-[#5C72A6] hover:bg-[#4A6EB0] text-white px-6 py-3 rounded-full font-bold shadow-md transition flex justify-center items-center gap-2 cursor-pointer text-sm md:text-base">
+                    <i class="fa-solid fa-download"></i> Export Report
+                </a>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-                <div class="bg-white rounded-2xl p-6 card-shadow border-l-4 border-blue-400">
-                    <h3 class="text-[#4A6EB0] font-bold text-sm mb-2">Total Transactions</h3>
-                    <span class="text-4xl font-bold text-[#4A6EB0]">{{ $totalTransactions }}</span>
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
+                <div class="bg-white rounded-2xl p-4 md:p-6 card-shadow border-l-4 border-blue-400">
+                    <h3 class="text-[#4A6EB0] font-bold text-[10px] md:text-sm mb-1 md:mb-2">Total Trx</h3>
+                    <span class="text-2xl md:text-4xl font-bold text-[#4A6EB0]">{{ $totalTransactions }}</span>
                 </div>
-                <div class="bg-white rounded-2xl p-6 card-shadow border-l-4 border-orange-400">
-                    <h3 class="text-[#4A6EB0] font-bold text-sm mb-2">Pending</h3>
-                    <span class="text-4xl font-bold text-[#4A6EB0]">{{ $pending }}</span>
+                <div class="bg-white rounded-2xl p-4 md:p-6 card-shadow border-l-4 border-orange-400">
+                    <h3 class="text-[#4A6EB0] font-bold text-[10px] md:text-sm mb-1 md:mb-2">Pending</h3>
+                    <span class="text-2xl md:text-4xl font-bold text-[#4A6EB0]">{{ $pending }}</span>
                 </div>
-                <div class="bg-white rounded-2xl p-6 card-shadow border-l-4 border-green-400">
-                    <h3 class="text-[#4A6EB0] font-bold text-sm mb-2">Successful</h3>
-                    <span class="text-4xl font-bold text-[#4A6EB0]">{{ $successful }}</span>
+                <div class="bg-white rounded-2xl p-4 md:p-6 card-shadow border-l-4 border-green-400">
+                    <h3 class="text-[#4A6EB0] font-bold text-[10px] md:text-sm mb-1 md:mb-2">Successful</h3>
+                    <span class="text-2xl md:text-4xl font-bold text-[#4A6EB0]">{{ $successful }}</span>
                 </div>
-                <div class="bg-white rounded-2xl p-6 card-shadow border-l-4 border-red-400">
-                    <h3 class="text-[#4A6EB0] font-bold text-sm mb-2">Cancelled</h3>
-                    <span class="text-4xl font-bold text-[#4A6EB0]">{{ $cancelled }}</span>
-                </div>
-                <div class="bg-white rounded-2xl p-6 card-shadow border-l-4 border-gray-400">
-                    <h3 class="text-[#4A6EB0] font-bold text-sm mb-2">Refunded</h3>
-                    <span class="text-4xl font-bold text-[#4A6EB0]">{{ $refunded }}</span>
+                <div class="bg-white rounded-2xl p-4 md:p-6 card-shadow border-l-4 border-red-400">
+                    <h3 class="text-[#4A6EB0] font-bold text-[10px] md:text-sm mb-1 md:mb-2">Cancelled</h3>
+                    <span class="text-2xl md:text-4xl font-bold text-[#4A6EB0]">{{ $cancelled }}</span>
                 </div>
             </div>
 
-            <div class="flex gap-4 mb-6">
-                <div class="relative flex-grow max-w-md">
+            <div class="flex flex-col md:flex-row gap-3 md:gap-4 mb-6">
+                <div class="relative flex-grow w-full lg:max-w-md">
                     <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-[#8CA1C4]"></i>
-                    <input type="text" id="searchInput" placeholder="Search...." class="w-full bg-[#DCE4F2] text-[#4A6EB0] placeholder-[#8CA1C4] rounded-full py-2.5 pl-12 pr-4 focus:outline-none">
+                    <input type="text" id="searchInput" placeholder="Search...." class="w-full bg-[#DCE4F2] text-[#4A6EB0] placeholder-[#8CA1C4] rounded-full py-2.5 pl-12 pr-4 focus:outline-none transition text-sm">
                 </div>
-                <div class="relative">
-                    <select class="bg-[#DCE4F2] text-[#4A6EB0] font-medium rounded-full py-2.5 px-6 appearance-none pr-10 outline-none w-48">
+                <div class="relative w-full md:w-auto">
+                    <select class="w-full md:w-48 bg-[#DCE4F2] text-[#4A6EB0] text-sm md:text-base font-medium rounded-full py-2.5 px-6 appearance-none pr-10 outline-none">
                         <option>All Statuses</option>
                         <option>Completed</option>
                         <option>Pending</option>
@@ -114,89 +134,87 @@
                 </div>
             </div>
 
-            <div class="bg-white rounded-2xl card-shadow overflow-hidden border border-gray-100 p-2">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse whitespace-nowrap">
-                        <thead>
-                            <tr class="bg-white text-[11px] uppercase tracking-widest text-black font-bold border-b border-gray-100">
-                                <th class="py-4 px-4">ID</th>
-                                <th class="py-4 px-4">USER</th>
-                                <th class="py-4 px-4">CAR</th>
-                                <th class="py-4 px-4">DATE</th>
-                                <th class="py-4 px-4">TOTAL</th>
-                                <th class="py-4 px-4">STATUS</th>
-                                <th class="py-4 px-4 text-center">ACTION</th>
-                            </tr>
-                        </thead>
-                        <tbody class="text-sm">
-                            @foreach($bookings as $booking)
-                            @php
-                                // Mapping status buat UI
-                                $uiStatus = ''; $color = '';
-                                if(in_array($booking->status, ['History', 'Ongoing'])) { 
-                                    $uiStatus = 'Completed'; 
-                                    $color = 'bg-green-300 text-white'; 
-                                } elseif(in_array($booking->status, ['Pending Payment', 'Ordered'])) { 
-                                    $uiStatus = 'Pending'; 
-                                    $color = 'bg-orange-300 text-white'; 
-                                } else { 
-                                    $uiStatus = 'Cancelled'; 
-                                    $color = 'bg-red-300 text-white'; 
-                                }
-                            @endphp
-                            <tr class="border-b border-gray-50 hover:bg-gray-50 transition">
-                                <td class="py-3 px-4">
-                                    <p class="font-bold text-[#1C2C4A]">{{ $booking->booking_code }}</p>
-                                    <p class="text-[10px] text-[#4A6EB0]">Rp {{ number_format($booking->total_price, 0, ',', '.') }}</p>
-                                </td>
-                                <td class="py-3 px-4">
-                                    <p class="font-bold text-[#1C2C4A]">{{ $booking->renter_name }}</p>
-                                    <p class="text-[10px] text-[#8CA1C4]">{{ $booking->renter_phone }}</p>
-                                </td>
-                                <td class="py-3 px-4 flex items-center gap-3">
-                                    <img src="{{ asset($booking->car->image_path) }}" class="w-12 h-8 object-contain bg-gray-100 rounded p-1">
-                                    <div>
-                                        <p class="font-bold text-[#1C2C4A]">{{ $booking->car->name }}</p>
-                                        <p class="text-[10px] text-[#8CA1C4]">{{ $booking->car->license_plate }}</p>
-                                    </div>
-                                </td>
-                                <td class="py-3 px-4 text-[#1C2C4A] text-[11px] font-medium">
-                                    {{ $booking->start_date->format('Y-m-d') }}<br>
-                                    <span class="text-gray-400 font-normal">s/d</span> {{ $booking->end_date->format('Y-m-d') }}
-                                </td>
-                                <td class="py-3 px-4">
-                                    <p class="font-bold text-[#1C2C4A]">Rp {{ number_format($booking->total_price, 0, ',', '.') }}</p>
-                                </td>
-                                <td class="py-3 px-4">
-                                    <span class="{{ $color }} px-4 py-1 text-[10px] rounded-full font-bold shadow-sm">{{ $uiStatus }}</span>
-                                </td>
-                                <td class="py-3 px-4 text-center">
-                                    <button onclick="openInvoiceModal({{ json_encode($booking) }}, {{ json_encode($booking->car) }}, '{{ $uiStatus }}')" class="text-[#4A6EB0] hover:text-blue-700 bg-[#EBF1FA] p-2 rounded-full transition shadow-sm">
-                                        <i class="fa-solid fa-eye"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
+            <div class="bg-white rounded-2xl card-shadow overflow-hidden border border-gray-100 p-2 md:p-4 w-full overflow-x-auto">
+                <table class="w-full min-w-[700px] text-left border-collapse whitespace-nowrap">
+                    <thead>
+                        <tr class="bg-white text-[10px] md:text-[11px] uppercase tracking-widest text-black font-bold border-b border-gray-100">
+                            <th class="py-3 px-3 md:py-4 md:px-4">ID</th>
+                            <th class="py-3 px-3 md:py-4 md:px-4">USER</th>
+                            <th class="py-3 px-3 md:py-4 md:px-4">CAR</th>
+                            <th class="py-3 px-3 md:py-4 md:px-4">DATE</th>
+                            <th class="py-3 px-3 md:py-4 md:px-4">TOTAL</th>
+                            <th class="py-3 px-3 md:py-4 md:px-4">STATUS</th>
+                            <th class="py-3 px-3 md:py-4 md:px-4 text-center">ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-xs md:text-sm">
+                        @foreach($bookings as $booking)
+                        @php
+                            // Mapping status buat UI
+                            $uiStatus = ''; $color = '';
+                            if(in_array($booking->status, ['History', 'Ongoing'])) { 
+                                $uiStatus = 'Completed'; 
+                                $color = 'bg-green-300 text-white'; 
+                            } elseif(in_array($booking->status, ['Pending Payment', 'Ordered'])) { 
+                                $uiStatus = 'Pending'; 
+                                $color = 'bg-orange-300 text-white'; 
+                            } else { 
+                                $uiStatus = 'Cancelled'; 
+                                $color = 'bg-red-300 text-white'; 
+                            }
+                        @endphp
+                        <tr class="border-b border-gray-50 hover:bg-gray-50 transition">
+                            <td class="py-3 px-3 md:px-4">
+                                <p class="font-bold text-[#1C2C4A]">{{ $booking->booking_code }}</p>
+                                <p class="text-[9px] md:text-[10px] text-[#4A6EB0]">Rp {{ number_format($booking->total_price, 0, ',', '.') }}</p>
+                            </td>
+                            <td class="py-3 px-3 md:px-4">
+                                <p class="font-bold text-[#1C2C4A] truncate max-w-[120px] md:max-w-[150px]">{{ $booking->renter_name }}</p>
+                                <p class="text-[9px] md:text-[10px] text-[#8CA1C4]">{{ $booking->renter_phone }}</p>
+                            </td>
+                            <td class="py-3 px-3 md:px-4 flex items-center gap-2 md:gap-3">
+                                <img src="{{ asset($booking->car->image_path) }}" class="w-10 h-6 md:w-12 md:h-8 object-contain bg-gray-100 rounded p-1 shrink-0">
+                                <div>
+                                    <p class="font-bold text-[#1C2C4A]">{{ $booking->car->name }}</p>
+                                    <p class="text-[9px] md:text-[10px] text-[#8CA1C4]">{{ $booking->car->license_plate }}</p>
+                                </div>
+                            </td>
+                            <td class="py-3 px-3 md:px-4 text-[#1C2C4A] text-[10px] md:text-[11px] font-medium">
+                                {{ $booking->start_date->format('Y-m-d') }}<br>
+                                <span class="text-gray-400 font-normal">s/d</span> {{ $booking->end_date->format('Y-m-d') }}
+                            </td>
+                            <td class="py-3 px-3 md:px-4">
+                                <p class="font-bold text-[#1C2C4A]">Rp {{ number_format($booking->total_price, 0, ',', '.') }}</p>
+                            </td>
+                            <td class="py-3 px-3 md:px-4">
+                                <span class="{{ $color }} px-3 py-1 md:px-4 text-[9px] md:text-[10px] rounded-full font-bold shadow-sm whitespace-nowrap">{{ $uiStatus }}</span>
+                            </td>
+                            <td class="py-3 px-3 md:px-4 text-center">
+                                <button onclick="openInvoiceModal({{ json_encode($booking) }}, {{ json_encode($booking->car) }}, '{{ $uiStatus }}')" class="text-[#4A6EB0] hover:text-blue-700 bg-[#EBF1FA] p-2 rounded-full transition shadow-sm w-7 h-7 md:w-8 md:h-8 flex items-center justify-center mx-auto">
+                                    <i class="fa-solid fa-eye text-[10px] md:text-sm"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
 
         </main>
         
-        <footer class="mt-auto pt-10 pb-8 px-8 flex justify-between items-end opacity-60">
+        <footer class="mt-auto pt-8 pb-6 px-4 md:px-8 flex flex-col md:flex-row justify-between items-center md:items-end gap-6 md:gap-0 opacity-60 text-center md:text-left">
             <div>
-                <h2 class="text-4xl font-bold font-bebas tracking-widest text-[#4A6EB0] mb-2">Tripzy</h2>
-                <div class="flex space-x-4 text-xl text-[#4A6EB0]">
+                <h2 class="text-3xl md:text-4xl font-bold font-bebas tracking-widest text-[#4A6EB0] mb-2">Tripzy</h2>
+                <div class="flex space-x-4 text-lg md:text-xl text-[#4A6EB0] justify-center md:justify-start">
                     <i class="fa-brands fa-discord"></i>
                     <i class="fa-brands fa-whatsapp"></i>
                     <i class="fa-brands fa-telegram"></i>
                     <i class="fa-brands fa-instagram"></i>
                 </div>
             </div>
-            <div class="text-right">
-                <h3 class="text-lg font-bold text-[#4A6EB0] mb-2">Contact Us</h3>
-                <ul class="space-y-1 text-[10px] font-medium text-[#4A6EB0]">
+            <div>
+                <h3 class="text-base md:text-lg font-bold text-[#4A6EB0] mb-2">Contact Us</h3>
+                <ul class="space-y-1 text-[9px] md:text-[10px] font-medium text-[#4A6EB0]">
                     <li><i class="fa-solid fa-location-dot"></i> Jl. Prof. Dr. Ir. Sumantri Brojonegoro</li>
                     <li><i class="fa-solid fa-phone"></i> +6285278139801</li>
                     <li><i class="fa-solid fa-envelope"></i> tripzy@gmail.com</li>
@@ -205,74 +223,74 @@
         </footer>
     </div>
 
-    <div id="invoiceModal" class="fixed inset-0 z-[60] flex items-center justify-center opacity-0 pointer-events-none modal p-4">
+    <div id="invoiceModal" class="fixed inset-0 z-[60] flex items-center justify-center opacity-0 pointer-events-none modal px-4">
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="toggleModal('invoiceModal')"></div>
         
-        <div class="bg-white rounded-2xl w-full max-w-lg relative shadow-2xl z-10 flex flex-col max-h-[95vh]">
+        <div class="bg-white rounded-2xl w-full max-w-lg relative shadow-2xl z-10 flex flex-col max-h-[90vh]">
             
-            <button onclick="toggleModal('invoiceModal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 z-20" id="btnCloseModal">
-                <i class="fa-solid fa-xmark text-xl"></i>
+            <button onclick="toggleModal('invoiceModal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 z-20 bg-white rounded-full p-1 shadow-sm" id="btnCloseModal">
+                <i class="fa-solid fa-xmark text-lg md:text-xl px-1"></i>
             </button>
 
-            <div id="invoiceContent" class="p-8 pb-4 overflow-y-auto bg-white rounded-t-2xl">
-                <h2 class="text-xl font-bold text-[#6B85B5] mb-6">E-Invoice</h2>
+            <div id="invoiceContent" class="p-6 md:p-8 pb-4 overflow-y-auto bg-white rounded-t-2xl hide-scroll">
+                <h2 class="text-lg md:text-xl font-bold text-[#6B85B5] mb-4 md:mb-6">E-Invoice</h2>
 
-                <div class="text-center mb-6 border-b border-gray-100 pb-6">
-                    <div class="w-20 h-16 mx-auto bg-[#DCE4F2] rounded-lg p-2 mb-3 flex items-center justify-center">
+                <div class="text-center mb-6 border-b border-gray-100 pb-4 md:pb-6">
+                    <div class="w-16 h-12 md:w-20 md:h-16 mx-auto bg-[#DCE4F2] rounded-lg p-2 mb-2 md:mb-3 flex items-center justify-center">
                         <img id="inv_car_img" src="" class="w-full h-full object-contain">
                     </div>
-                    <h3 id="inv_car_name" class="text-lg font-bold text-[#6B85B5] uppercase"></h3>
-                    <p id="inv_car_plate" class="text-xs text-[#8CA1C4] uppercase tracking-wider"></p>
+                    <h3 id="inv_car_name" class="text-base md:text-lg font-bold text-[#6B85B5] uppercase"></h3>
+                    <p id="inv_car_plate" class="text-[10px] md:text-xs text-[#8CA1C4] uppercase tracking-wider"></p>
                 </div>
 
-                <div class="bg-[#E2EAF6] rounded-xl p-6 mb-4 text-sm text-[#1C2C4A] space-y-3 font-medium">
+                <div class="bg-[#E2EAF6] rounded-xl p-4 md:p-6 mb-4 text-xs md:text-sm text-[#1C2C4A] space-y-2 md:space-y-3 font-medium">
                     <div class="flex justify-between">
-                        <span class="text-gray-600">User</span>
-                        <span id="inv_user" class="font-bold text-right"></span>
+                        <span class="text-gray-600 shrink-0">User</span>
+                        <span id="inv_user" class="font-bold text-right truncate pl-4"></span>
                     </div>
                     <div class="flex justify-between">
-                        <span class="text-gray-600">Car</span>
-                        <span id="inv_car_name2" class="font-bold text-right"></span>
+                        <span class="text-gray-600 shrink-0">Car</span>
+                        <span id="inv_car_name2" class="font-bold text-right truncate pl-4"></span>
                     </div>
                     <div class="flex justify-between">
-                        <span class="text-gray-600">Period</span>
-                        <span id="inv_period" class="font-bold text-right"></span>
+                        <span class="text-gray-600 shrink-0">Period</span>
+                        <span id="inv_period" class="font-bold text-right truncate pl-4"></span>
                     </div>
                     <div class="flex justify-between">
-                        <span class="text-gray-600">Duration</span>
-                        <span id="inv_duration" class="font-bold text-right"></span>
+                        <span class="text-gray-600 shrink-0">Duration</span>
+                        <span id="inv_duration" class="font-bold text-right truncate pl-4"></span>
                     </div>
                     <div class="flex justify-between">
-                        <span class="text-gray-600">Daily Rate</span>
-                        <span id="inv_rate" class="font-bold text-right"></span>
+                        <span class="text-gray-600 shrink-0">Daily Rate</span>
+                        <span id="inv_rate" class="font-bold text-right truncate pl-4"></span>
                     </div>
                     <div class="flex justify-between">
-                        <span class="text-gray-600">Payment Method</span>
-                        <span class="font-bold text-right">Qris</span>
+                        <span class="text-gray-600 shrink-0">Payment Method</span>
+                        <span class="font-bold text-right truncate pl-4">Qris</span>
                     </div>
                     <div class="flex justify-between items-center mt-2 pt-2 border-t border-[#C5D6F5]">
-                        <span class="text-gray-600">Status</span>
+                        <span class="text-gray-600 shrink-0">Status</span>
                         <span id="inv_status" class="font-bold"></span>
                     </div>
                 </div>
 
-                <div class="bg-[#DCE4F2] rounded-xl p-6 text-sm text-[#1C2C4A]">
-                    <div class="flex justify-between items-center mb-3">
-                        <span id="inv_calc_text" class="text-gray-600"></span>
-                        <span id="inv_calc_total" class="font-bold"></span>
+                <div class="bg-[#DCE4F2] rounded-xl p-4 md:p-6 text-xs md:text-sm text-[#1C2C4A]">
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-3 gap-1 sm:gap-0">
+                        <span id="inv_calc_text" class="text-gray-600 text-[10px] md:text-xs"></span>
+                        <span id="inv_calc_total" class="font-bold text-right"></span>
                     </div>
                     <div class="flex justify-between items-center pt-3 border-t border-[#B2C5E5]">
-                        <span class="text-lg font-extrabold">TOTAL</span>
-                        <span id="inv_grand_total" class="text-lg font-extrabold"></span>
+                        <span class="text-base md:text-lg font-extrabold">TOTAL</span>
+                        <span id="inv_grand_total" class="text-base md:text-lg font-extrabold"></span>
                     </div>
                 </div>
             </div>
 
-            <div class="p-6 pt-4 bg-white rounded-b-2xl border-t border-gray-50 flex gap-4" id="actionButtons">
-                <button onclick="toggleModal('invoiceModal')" class="w-1/3 py-3 rounded-full border border-[#6B85B5] text-[#6B85B5] font-bold hover:bg-gray-50 transition">
+            <div class="p-4 md:p-6 bg-white rounded-b-2xl border-t border-gray-50 flex gap-3 md:gap-4 shrink-0" id="actionButtons">
+                <button onclick="toggleModal('invoiceModal')" class="w-1/3 py-2.5 md:py-3 rounded-full border border-[#6B85B5] text-[#6B85B5] font-bold hover:bg-gray-50 transition text-xs md:text-sm">
                     Close
                 </button>
-                <button onclick="downloadPDF()" class="w-2/3 py-3 rounded-full bg-[#4A6EB0] text-white font-bold hover:bg-[#38558A] transition shadow-md flex justify-center items-center gap-2">
+                <button onclick="downloadPDF()" class="w-2/3 py-2.5 md:py-3 rounded-full bg-[#4A6EB0] text-white font-bold hover:bg-[#38558A] transition shadow-md flex justify-center items-center gap-2 text-xs md:text-sm">
                     <i class="fa-solid fa-download"></i> Download PDF
                 </button>
             </div>
@@ -280,6 +298,23 @@
     </div>
 
     <script>
+        // Toggle Sidebar Mobile
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            if (sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+                setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('opacity-0');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
+            }
+        }
+
+        // Toggle Modal
         function toggleModal(modalID) {
             const modal = document.getElementById(modalID);
             if (modal.classList.contains('opacity-0')) {
@@ -295,7 +330,6 @@
             return "Rp " + num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         }
 
-        // Variabel global buat nangkep kode booking saat PDF didownload
         let currentBookingCode = 'INV';
 
         // Buka Modal & Isi Data Dinamis
@@ -334,7 +368,6 @@
 
         // Fungsi Download PDF menggunakan html2pdf.js
         function downloadPDF() {
-            // Target div yang mau di-print (cuma kontennya, tombol-tombol diabaikan)
             const element = document.getElementById('invoiceContent');
             
             // Konfigurasi PDF
@@ -342,7 +375,7 @@
                 margin:       [0.5, 0.5, 0.5, 0.5], // inci
                 filename:     `${currentBookingCode}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true }, // useCORS penting biar gambar mobil bisa ke-render
+                html2canvas:  { scale: 2, useCORS: true }, 
                 jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
             };
 

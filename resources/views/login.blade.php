@@ -41,45 +41,36 @@
         }
     </style>
 </head>
-<body class="bg-split min-h-screen flex items-center justify-center">
+<body class="bg-split min-h-screen flex items-center justify-center p-4 md:p-0">
 
-    <!-- Container Utama -->
-    <div class="w-full h-screen grid grid-cols-1 md:grid-cols-2 relative">
+    <div class="w-full h-full md:h-screen grid grid-cols-1 md:grid-cols-2 relative gap-8 md:gap-0 max-w-lg md:max-w-none py-8 md:py-0">
         
-        <!-- Garis Pemisah Tengah (Samar-samar seperti di desain) -->
         <div class="hidden md:block absolute left-1/2 top-0 bottom-0 w-[1px] bg-white/10 -translate-x-1/2"></div>
 
-        <!-- KOLOM KIRI (Form Login) -->
-        <div class="flex items-center justify-center p-8">
-            <div class="glass-card w-full max-w-md rounded-2xl p-10 flex flex-col relative z-10">
-                <h2 class="text-3xl font-bold text-[#1C2C4A] text-center mb-6 drop-shadow-sm">Login here.</h2>
+        <div class="flex items-center justify-center md:p-8 relative z-10 order-1">
+            <div class="glass-card w-full max-w-md rounded-2xl p-6 md:p-10 flex flex-col relative z-10">
+                <h2 class="text-2xl md:text-3xl font-bold text-[#1C2C4A] text-center mb-6 drop-shadow-sm">Login here.</h2>
                 
-                <!-- Notifikasi Pesan Sukses (Habis Register) -->
                 @if(session('success'))
-                    <div class="bg-green-100 text-green-700 p-3 rounded-lg mb-4 text-sm text-center font-medium">
+                    <div class="bg-green-100 text-green-700 p-3 rounded-lg mb-4 text-xs md:text-sm text-center font-medium shadow-sm border border-green-200">
                         {{ session('success') }}
                     </div>
                 @endif
 
-                <!-- Notifikasi Pesan Error (Kalo salah password/email) -->
                 @if ($errors->any())
-                    <div class="bg-red-100 text-red-600 p-3 rounded-lg mb-4 text-sm text-center font-medium">
+                    <div class="bg-red-100 text-red-600 p-3 rounded-lg mb-4 text-xs md:text-sm text-center font-medium shadow-sm border border-red-200">
                         {{ $errors->first() }}
                     </div>
                 @endif
 
-                <!-- Form dicolok ke Route Login dan pake method POST -->
                 <form action="{{ route('login') }}" method="POST" class="flex flex-col">
-                    @csrf <!-- Wajib ada buat security Laravel -->
+                    @csrf 
                     
-                    <!-- Input Email (ditambahin name="email" dan old value) -->
-                    <input type="email" name="email" value="{{ old('email') }}" placeholder="Email" class="input-glass w-full rounded-lg py-3 px-4 mb-5 text-[#1C2C4A] font-medium" required>
+                    <input type="email" name="email" value="{{ old('email') }}" placeholder="Email" class="input-glass w-full rounded-lg py-2.5 md:py-3 px-4 mb-4 md:mb-5 text-[#1C2C4A] font-medium text-sm md:text-base" required>
                     
-                    <!-- Input Password (ditambahin name="password") -->
-                    <input type="password" name="password" placeholder="Password" class="input-glass w-full rounded-lg py-3 px-4 mb-4 text-[#1C2C4A] font-medium" required>
+                    <input type="password" name="password" placeholder="Password" class="input-glass w-full rounded-lg py-2.5 md:py-3 px-4 mb-4 text-[#1C2C4A] font-medium text-sm md:text-base" required>
                     
-                    <!-- Remember me & Forgot Password -->
-                    <div class="flex justify-between items-center text-xs text-white mb-10 font-medium opacity-90">
+                    <div class="flex justify-between items-center text-[10px] md:text-xs text-white mb-8 md:mb-10 font-medium opacity-90">
                         <label class="flex items-center gap-2 cursor-pointer hover:text-blue-200 transition">
                             <input type="checkbox" name="remember" class="rounded w-3 h-3 border-none bg-white/50 text-blue-500 focus:ring-0 cursor-pointer"> 
                             Remember me
@@ -87,9 +78,8 @@
                         <a href="#" class="hover:text-blue-200 transition">Forgot Password?</a>
                     </div>
                     
-                    <!-- Login Button -->
                     <div class="flex justify-center">
-                        <button type="submit" class="bg-[#B3CBF2] text-white font-semibold py-2.5 px-12 rounded-full hover:bg-white hover:text-[#4A6EB0] transition duration-300 shadow-md">
+                        <button type="submit" class="bg-[#B3CBF2] text-white font-semibold py-2.5 px-10 md:px-12 rounded-full hover:bg-white hover:text-[#4A6EB0] transition duration-300 shadow-md text-sm md:text-base w-full md:w-auto">
                             Login
                         </button>
                     </div>
@@ -97,17 +87,15 @@
             </div>
         </div>
 
-        <!-- KOLOM KANAN (Register Info) -->
-        <div class="flex items-center justify-center p-8 relative z-10">
+        <div class="flex items-center justify-center md:p-8 relative z-10 order-2 mt-4 md:mt-0">
             <div class="text-center max-w-md text-white">
-                <h1 class="text-5xl md:text-6xl font-bold mb-6 leading-[1.1] drop-shadow-md">
-                    Start your<br>journey now
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6 leading-[1.1] drop-shadow-md">
+                    Start your<br class="hidden md:block">journey now
                 </h1>
-                <p class="text-base md:text-lg opacity-90 mb-12 leading-relaxed drop-shadow-sm">
-                    If you don't have an account yet, join us<br>and start your journey
+                <p class="text-sm md:text-base lg:text-lg opacity-90 mb-8 md:mb-12 leading-relaxed drop-shadow-sm px-4 md:px-0">
+                    If you don't have an account yet, join us<br class="hidden md:block">and start your journey
                 </p>
-                <!-- Link diganti ngarah ke halaman Register -->
-                <a href="{{ route('register') }}" class="inline-block border border-white/60 text-white py-2.5 px-12 rounded-full hover:bg-white hover:text-[#1C2C4A] font-medium transition duration-300 shadow-sm backdrop-blur-sm">
+                <a href="{{ route('register') }}" class="inline-block border border-white/60 text-white py-2 px-12 md:py-2.5 md:px-12 rounded-full hover:bg-white hover:text-[#1C2C4A] font-medium transition duration-300 shadow-sm backdrop-blur-sm text-sm md:text-base">
                     Register
                 </a>
             </div>

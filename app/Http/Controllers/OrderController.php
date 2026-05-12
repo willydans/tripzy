@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
+use Midtrans\Config;
+use Midtrans\Snap;
 
 class OrderController extends Controller
 {
@@ -38,15 +40,15 @@ class OrderController extends Controller
             'renter_phone' => 'required|string|max:20',
             'renter_id_number' => 'required|string|max:50',
             'pickup_time' => 'required',
-            'doc_ktp' => 'required_without:doc_passport|image|mimes:jpeg,png,jpg|max:10240', // 👈 UBAH DISINI
+            'doc_ktp' => 'required_without:doc_passport|image|mimes:jpeg,png,jpg|max:10240',
             'doc_sim' => 'required|image|mimes:jpeg,png,jpg|max:10240',
-            'doc_passport' => 'required_without:doc_ktp|image|mimes:jpeg,png,jpg|max:10240', // 👈 UBAH DISINI
+            'doc_passport' => 'required_without:doc_ktp|image|mimes:jpeg,png,jpg|max:10240',
             'doc_selfie' => 'required|image|mimes:jpeg,png,jpg|max:10240',
             'total_price' => 'required|numeric'
         ]);
 
         try {
-            // 2. Upload Dokumen ke Storage (Cek dulu ada filenya atau nggak)
+            // 2. Upload Dokumen ke Storage (Cek ketersediaan file)
             $ktpPath = null;
             if ($request->hasFile('doc_ktp')) {
                 $ktpPath = $request->file('doc_ktp')->store('bookings', 'public');
@@ -90,7 +92,7 @@ class OrderController extends Controller
                 'doc_selfie' => $selfiePath,
             ]);
 
-            return redirect()->route('user.payment', $booking->id)->with('success', 'Booking created successfully! Please complete your payment.');
+            return redirect()->route('user.payment', $booking->id)->with('success', 'Booking berhasil dibuat! Silakan selesaikan pembayaran Anda.');
 
         } catch (\Exception $e) {
             return back()->withErrors('Error: ' . $e->getMessage())->withInput();
@@ -105,19 +107,15 @@ class OrderController extends Controller
         $booking = Booking::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
         
         if ($booking->status == 'Pending Payment') {
-            $booking->update([
-                'status' => 'Ongoing',
-                'payment_status' => 'Paid' 
-            ]);
-            
-            return redirect()->route('user.payment', $booking->id)->with('success', 'Payment confirmed! Status is now Ongoing and Paid.');
+            // Mengarahkan pengguna kembali ke halaman QRIS Midtrans
+            return redirect()->route('user.payment', $booking->id);
         }
 
         return back()->with('error', 'Booking tidak valid untuk diproses.');
     }
 
     // ----------------------------------------------------
-    // HALAMAN PAYMENT / QRIS
+    // HALAMAN PAYMENT / INTEGRASI MIDTRANS QRIS
     // ----------------------------------------------------
     public function payment($id)
     {
@@ -129,7 +127,33 @@ class OrderController extends Controller
             return redirect()->route('user.orders')->with('error', 'Booking ini sudah tidak aktif atau dibatalkan.');
         }
 
-        return view('user_payment', compact('booking'));
+        // Konfigurasi Midtrans
+        Config::$serverKey = env('MIDTRANS_SERVER_KEY');
+        Config::$isProduction = env('MIDTRANS_IS_PRODUCTION', false);
+        Config::$isSanitized = true;
+        Config::$is3ds = true;
+
+        // Persiapan parameter untuk dikirim ke Midtrans
+        $params = [
+            'transaction_details' => [
+                // Order ID ditambahkan fungsi time() agar selalu unik jika terjadi percobaan ulang
+                'order_id' => $booking->booking_code . '-' . time(), 
+                'gross_amount' => (int) $booking->total_price,
+            ],
+            'customer_details' => [
+                'first_name' => $booking->renter_name,
+                'email' => Auth::user()->email,
+                'phone' => $booking->renter_phone,
+            ],
+            // 👇 UPDATE DI SINI: Gunakan parameter resmi Midtrans untuk memunculkan QRIS
+            'enabled_payments' => ['gopay', 'other_qris'], 
+        ];
+
+        // Meminta Snap Token ke API Midtrans
+        $snapToken = Snap::getSnapToken($params);
+
+        // Meneruskan data booking beserta Snap Token ke tampilan antarmuka
+        return view('user_payment', compact('booking', 'snapToken'));
     }
 
     // ----------------------------------------------------
@@ -140,13 +164,15 @@ class OrderController extends Controller
         $booking = Booking::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
         
         if ($booking->status == 'Pending Payment' || $booking->status == 'Ordered') {
+            
+            // Hanya ubah status booking, payment_status dibiarkan agar tidak terjadi bentrok constraint database
             $booking->update([
-                'status' => 'Cancelled',
-                'payment_status' => 'Cancelled'
+                'status' => 'Cancelled'
             ]);
+            
             return back()->with('success', 'Booking berhasil dibatalkan.');
         }
 
-        return back()->with('error', 'Booking tidak bisa dibatalkan.');
+        return back()->with('error', 'Booking tidak dapat dibatalkan.');
     }
 }
