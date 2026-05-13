@@ -23,10 +23,47 @@
         /* Sembunyikan scrollbar untuk elemen tertentu di mobile */
         .hide-scroll::-webkit-scrollbar { display: none; }
         .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Custom Input Form Sesuai UI */
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: #6B85B5;
+            margin-bottom: 0.5rem;
+        }
+        .form-input {
+            width: 100%;
+            border: 1px solid #B2C5E5;
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            color: #1C2C4A;
+            background-color: white;
+            transition: all 0.3s ease;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #5C72A6;
+            box-shadow: 0 0 0 3px rgba(92, 114, 166, 0.1);
+        }
+        .form-input::placeholder {
+            color: #B2C5E5;
+        }
+        select.form-input {
+            appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%236B85B5%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 0.65em auto;
+            color: #8CA1C4;
+        }
+        select.form-input option { color: #1C2C4A; }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden text-[#1C2C4A]">
 
+    <!-- TOAST NOTIFICATION -->
     @if(session('success'))
     <div id="toastNotification" class="fixed inset-0 flex items-center justify-center z-[100] bg-black/40 backdrop-blur-sm transition-opacity duration-300 px-4">
         <div class="bg-[#5C72A6] rounded-2xl p-6 md:p-8 flex flex-col items-center shadow-2xl relative w-full max-w-sm transform scale-100 transition-transform">
@@ -46,8 +83,10 @@
     </script>
     @endif
 
+    <!-- OVERLAY SIDEBAR MOBILE -->
     <div id="sidebarOverlay" class="fixed inset-0 bg-black/50 z-30 hidden md:hidden transition-opacity opacity-0" onclick="toggleSidebar()"></div>
 
+    <!-- SIDEBAR -->
     <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 sidebar-bg text-white flex flex-col h-full shadow-2xl md:shadow-lg z-40 transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300 shrink-0">
         <div class="p-6 flex justify-between items-center">
             <div>
@@ -57,33 +96,23 @@
             <button onclick="toggleSidebar()" class="md:hidden text-white text-2xl hover:text-gray-200"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <nav class="mt-2 md:mt-6 flex-grow flex flex-col gap-2 px-4 overflow-y-auto hide-scroll pb-4">
-            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-lg font-medium opacity-80 hover:opacity-100 transition">
-                Dashboard
-            </a>
-            <a href="{{ route('admin.bookings.index') }}" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-lg font-medium opacity-80 hover:opacity-100 transition">
-                Booking Verification
-            </a>
-            <a href="{{ route('admin.catalog.index') }}" class="flex items-center gap-3 px-4 py-3 bg-white/20 rounded-lg font-semibold border border-white/30 backdrop-blur-sm shadow-sm transition">
-                Manage Catalog
-            </a>
-            <a href="{{ route('admin.users.index') }}" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-lg font-medium opacity-80 hover:opacity-100 transition">
-                User Management
-            </a>
-            <a href="{{ route('admin.transactions.index') }}" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-lg font-medium opacity-80 transition">
-                Transactions
-            </a>
+            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-lg font-medium opacity-80 hover:opacity-100 transition">Dashboard</a>
+            <a href="{{ route('admin.bookings.index') }}" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-lg font-medium opacity-80 hover:opacity-100 transition">Booking Verification</a>
+            <a href="{{ route('admin.catalog.index') }}" class="flex items-center gap-3 px-4 py-3 bg-white/20 rounded-lg font-semibold border border-white/30 backdrop-blur-sm shadow-sm transition">Manage Catalog</a>
+            <a href="{{ route('admin.users.index') }}" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-lg font-medium opacity-80 hover:opacity-100 transition">User Management</a>
+            <a href="{{ route('admin.transactions.index') }}" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-lg font-medium opacity-80 transition">Transactions</a>
         </nav>
     </aside>
 
+    <!-- MAIN CONTENT WRAPPER -->
     <div class="flex-grow flex flex-col h-full overflow-y-auto relative bg-[#F4F7FC]">
         
+        <!-- HEADER TOPBAR -->
         <header class="topbar-bg px-4 md:px-8 py-4 md:py-5 flex justify-between items-center sticky top-0 z-20 shadow-sm md:shadow-none">
-            
             <div class="flex items-center gap-3 md:gap-0">
                 <button onclick="toggleSidebar()" class="md:hidden text-[#4A6EB0] text-2xl focus:outline-none">
                     <i class="fa-solid fa-bars"></i>
                 </button>
-                
                 <div class="relative w-full max-w-[200px] md:max-w-xs lg:w-96 hidden sm:block">
                     <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-[#4A6EB0] md:text-white"></i>
                     <input type="text" placeholder="Search...." class="w-full glass-search text-[#4A6EB0] md:text-white placeholder-[#8CA1C4] md:placeholder-white rounded-full py-2 md:py-2.5 pl-10 md:pl-12 pr-4 focus:outline-none focus:bg-white/30 transition shadow-inner text-sm md:text-base">
@@ -96,9 +125,7 @@
                     <button type="submit" class="text-xs text-red-500 font-semibold hover:underline">Logout</button>
                 </form>
                 <div class="flex items-center gap-2 md:gap-3 bg-white/60 md:bg-white/40 px-3 md:px-4 py-1.5 md:py-2 rounded-full border border-white/50 backdrop-blur-sm shadow-sm">
-                    <div class="w-8 h-8 md:w-10 md:h-10 bg-[#1C2C4A] rounded-full flex items-center justify-center text-white text-sm md:text-base">
-                        <i class="fa-solid fa-user"></i>
-                    </div>
+                    <div class="w-8 h-8 md:w-10 md:h-10 bg-[#1C2C4A] rounded-full flex items-center justify-center text-white text-sm md:text-base"><i class="fa-solid fa-user"></i></div>
                     <div class="leading-tight hidden sm:block">
                         <h4 class="text-xs md:text-sm font-bold">{{ Auth::user()->name }}</h4>
                         <p class="text-[9px] md:text-[10px] font-medium text-[#4A6EB0]">Super Admin</p>
@@ -111,33 +138,36 @@
             </div>
         </header>
 
+        <!-- MAIN CONTENT -->
         <main class="p-4 md:p-8 pb-24">
             
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-8">
                 <div>
                     <h2 class="text-2xl md:text-3xl font-bold text-[#4A6EB0]">Manage Catalog</h2>
-                    <p class="text-xs md:text-sm text-gray-500">Kelola katalog mobil sewa</p>
+                    <p class="text-xs md:text-sm text-gray-500">Kelola katalog mobil sewa dan ketersediaan stok</p>
                 </div>
                 <button onclick="toggleModal('addCarModal')" class="w-full sm:w-auto justify-center bg-[#5C72A6] hover:bg-[#4A5D8A] text-white font-semibold py-2.5 px-6 rounded-full shadow-md transition flex items-center gap-2 text-sm md:text-base">
                     <i class="fa-solid fa-plus"></i> Add Car
                 </button>
             </div>
 
+            <!-- SEARCH & FILTER -->
             <div class="flex flex-col lg:flex-row gap-3 md:gap-4 mb-6">
                 <div class="relative flex-grow w-full lg:max-w-md">
                     <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-[#8CA1C4]"></i>
                     <input type="text" placeholder="Search...." class="w-full bg-[#DCE4F2] text-[#4A6EB0] placeholder-[#8CA1C4] rounded-full py-2.5 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-[#8CA1C4] transition text-sm">
                 </div>
                 <div class="flex gap-2 md:gap-4 overflow-x-auto hide-scroll pb-1">
-                    <select class="bg-[#DCE4F2] text-[#4A6EB0] text-sm md:text-base font-medium rounded-full py-2.5 px-5 md:px-6 appearance-none pr-8 md:pr-10 relative bg-no-repeat bg-[right_1rem_center] bg-[length:1em_1em] whitespace-nowrap outline-none" style="background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%234A6EB0%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E')">
+                    <select class="bg-[#DCE4F2] text-[#4A6EB0] text-sm md:text-base font-medium rounded-full py-2.5 px-5 md:px-6 appearance-none pr-8 md:pr-10 relative bg-no-repeat bg-[right_1rem_center] bg-[length:1em_1em] whitespace-nowrap outline-none">
                         <option>All Statuses</option>
                     </select>
-                    <select class="bg-[#DCE4F2] text-[#4A6EB0] text-sm md:text-base font-medium rounded-full py-2.5 px-5 md:px-6 appearance-none pr-8 md:pr-10 relative bg-no-repeat bg-[right_1rem_center] bg-[length:1em_1em] whitespace-nowrap outline-none" style="background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%234A6EB0%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E')">
+                    <select class="bg-[#DCE4F2] text-[#4A6EB0] text-sm md:text-base font-medium rounded-full py-2.5 px-5 md:px-6 appearance-none pr-8 md:pr-10 relative bg-no-repeat bg-[right_1rem_center] bg-[length:1em_1em] whitespace-nowrap outline-none">
                         <option>All Categories</option>
                     </select>
                 </div>
             </div>
 
+            <!-- TABLE WRAPPER -->
             <div class="bg-white rounded-2xl card-shadow overflow-hidden border border-gray-100 w-full overflow-x-auto">
                 <table class="w-full min-w-[800px] text-left border-collapse">
                     <thead>
@@ -145,9 +175,9 @@
                             <th class="py-4 px-6">CAR</th>
                             <th class="py-4 px-6">PLATE</th>
                             <th class="py-4 px-6">CATEGORY</th>
+                            <th class="py-4 px-6 text-center">QTY</th>
                             <th class="py-4 px-6">STATUS</th>
                             <th class="py-4 px-6">HARGA/HARI</th>
-                            <th class="py-4 px-6">SERVIS</th>
                             <th class="py-4 px-6 text-center">ACTION</th>
                         </tr>
                     </thead>
@@ -163,6 +193,14 @@
                             </td>
                             <td class="py-3 px-6 text-[#4A6EB0] font-medium whitespace-nowrap">{{ $car->license_plate }}</td>
                             <td class="py-3 px-6 text-[#4A6EB0] whitespace-nowrap">{{ $car->category }}</td>
+                            
+                            <!-- DATA QTY -->
+                            <td class="py-3 px-6 text-center">
+                                <span class="font-bold text-[#1C2C4A] bg-[#EBF1FA] px-3 py-1 rounded-full text-xs border border-[#B2C5E5]">
+                                    {{ $car->stock ?? 1 }} Unit
+                                </span>
+                            </td>
+
                             <td class="py-3 px-6">
                                 @if($car->status == 'Tersedia')
                                     <span class="bg-green-100 text-green-600 px-3 py-1 text-[10px] rounded-full font-bold whitespace-nowrap">Tersedia</span>
@@ -173,13 +211,12 @@
                                 @endif
                             </td>
                             <td class="py-3 px-6 text-[#4A6EB0] font-medium whitespace-nowrap">Rp {{ number_format($car->price_per_day, 0, ',', '.') }}</td>
-                            <td class="py-3 px-6 text-[#4A6EB0] whitespace-nowrap">{{ $car->updated_at->format('Y-m-d') }}</td>
                             <td class="py-3 px-6 text-center">
                                 <div class="flex items-center justify-center gap-3">
                                     <button onclick="openEditModal({{ json_encode($car) }})" class="text-[#4A6EB0] bg-[#DCE4F2] hover:bg-[#4A6EB0] hover:text-white w-8 h-8 rounded-full transition flex items-center justify-center">
                                         <i class="fa-regular fa-pen-to-square"></i>
                                     </button>
-                                    <button onclick="openDeleteModal({{ $car->id }}, '{{ $car->name }}')" class="text-red-500 bg-red-100 hover:bg-red-500 hover:text-white w-8 h-8 rounded-full transition flex items-center justify-center">
+                                    <button onclick="openDeleteModal({{ $car->id }}, '{{ addslashes($car->name) }}')" class="text-red-500 bg-red-100 hover:bg-red-500 hover:text-white w-8 h-8 rounded-full transition flex items-center justify-center">
                                         <i class="fa-regular fa-trash-can"></i>
                                     </button>
                                 </div>
@@ -189,39 +226,43 @@
                     </tbody>
                 </table>
             </div>
-
         </main>
     </div>
 
-    <div id="addCarModal" class="fixed inset-0 z-[60] flex items-center justify-center opacity-0 pointer-events-none modal px-4">
+    <!-- MODAL ADD CAR Sesuai Desain UI -->
+    <div id="addCarModal" class="fixed inset-0 z-[60] flex items-center justify-center opacity-0 pointer-events-none modal px-4 py-6">
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="toggleModal('addCarModal')"></div>
-        <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative shadow-2xl p-5 md:p-8 z-10 hide-scroll">
+        <div class="bg-white rounded-3xl w-full max-w-3xl max-h-[95vh] overflow-y-auto relative shadow-2xl p-6 md:p-10 z-10 hide-scroll border border-gray-100">
             
-            <div class="flex justify-between items-center mb-6 sticky top-0 bg-white z-20 pb-2 border-b border-gray-100">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-[#4A6EB0] rounded-full flex items-center justify-center text-white shrink-0"><i class="fa-solid fa-plus"></i></div>
+            <div class="flex items-center justify-between mb-8 pb-4 border-b border-gray-100">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-[#5C72A6] rounded-full flex items-center justify-center text-white shrink-0 shadow-md">
+                        <i class="fa-solid fa-plus text-xl"></i>
+                    </div>
                     <div>
-                        <h2 class="text-lg md:text-xl font-bold text-[#4A6EB0]">Add Car</h2>
-                        <p class="text-[10px] md:text-xs text-[#8CA1C4]">Add new cars to the catalog</p>
+                        <h2 class="text-xl md:text-2xl font-bold text-[#5C72A6]">Add Car</h2>
+                        <p class="text-xs md:text-sm text-[#8CA1C4]">Add new cars to the catalog</p>
                     </div>
                 </div>
-                <button onclick="toggleModal('addCarModal')" class="text-[#8CA1C4] hover:text-red-500 text-xl md:text-2xl p-2"><i class="fa-solid fa-xmark"></i></button>
+                <button onclick="toggleModal('addCarModal')" class="text-[#8CA1C4] hover:text-red-500 text-2xl p-2 transition"><i class="fa-solid fa-xmark"></i></button>
             </div>
 
             <form action="{{ route('admin.catalog.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5 mb-8">
+                    
                     <div>
-                        <label class="block text-xs md:text-sm font-bold text-[#4A6EB0] mb-1">Car Models <span class="text-red-500">*</span></label>
-                        <input type="text" name="name" placeholder="Example: Toyota Rush" class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#4A6EB0]" required>
+                        <label class="form-label">Car Models <span class="text-red-500">*</span></label>
+                        <input type="text" name="name" placeholder="Example: Toyota Rush" class="form-input" required>
                     </div>
                     <div>
-                        <label class="block text-xs md:text-sm font-bold text-[#4A6EB0] mb-1">Number plate <span class="text-red-500">*</span></label>
-                        <input type="text" name="license_plate" placeholder="Example: BE 4829 ZI" class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#4A6EB0]" required>
+                        <label class="form-label">Number plate <span class="text-red-500">*</span></label>
+                        <input type="text" name="license_plate" placeholder="Example: BE 4829 ZI" class="form-input" required>
                     </div>
+
                     <div>
-                        <label class="block text-xs md:text-sm font-bold text-[#4A6EB0] mb-1">Category</label>
-                        <select name="category" class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#4A6EB0]">
+                        <label class="form-label">Category</label>
+                        <select name="category" class="form-input" onchange="this.style.color='#1C2C4A'">
                             <option value="SUV">SUV</option>
                             <option value="MPV">MPV</option>
                             <option value="Prem SUV">Prem SUV</option>
@@ -230,28 +271,30 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs md:text-sm font-bold text-[#4A6EB0] mb-1">Status</label>
-                        <select name="status" class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#4A6EB0]">
+                        <label class="form-label">Status</label>
+                        <select name="status" class="form-input" onchange="this.style.color='#1C2C4A'">
                             <option value="Tersedia">Tersedia</option>
                             <option value="Disewa">Disewa</option>
                             <option value="Maintenance">Maintenance</option>
                         </select>
                     </div>
+
                     <div>
-                        <label class="block text-xs md:text-sm font-bold text-[#4A6EB0] mb-1">Price/Day (Rp) <span class="text-red-500">*</span></label>
-                        <input type="number" name="price_per_day" placeholder="Example: 800000" class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#4A6EB0]" required>
+                        <label class="form-label">Price per Day (Rp) <span class="text-red-500">*</span></label>
+                        <input type="number" name="price_per_day" placeholder="Example: 800000" class="form-input" required>
                     </div>
                     <div>
-                        <label class="block text-xs md:text-sm font-bold text-[#4A6EB0] mb-1">Year <span class="text-red-500">*</span></label>
-                        <input type="number" name="year" placeholder="Example: 2026" class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#4A6EB0]" required>
+                        <label class="form-label">Year <span class="text-red-500">*</span></label>
+                        <input type="number" name="year" placeholder="Example: 2026" class="form-input" required>
+                    </div>
+
+                    <div>
+                        <label class="form-label">Color <span class="text-red-500">*</span></label>
+                        <input type="text" name="color" placeholder="Example: Toyota Rush" class="form-input" required>
                     </div>
                     <div>
-                        <label class="block text-xs md:text-sm font-bold text-[#4A6EB0] mb-1">Color <span class="text-red-500">*</span></label>
-                        <input type="text" name="color" placeholder="Example: Putih" class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#4A6EB0]" required>
-                    </div>
-                    <div>
-                        <label class="block text-xs md:text-sm font-bold text-[#4A6EB0] mb-1">Fuel</label>
-                        <select name="fuel_type" class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#4A6EB0]">
+                        <label class="form-label">Fuel</label>
+                        <select name="fuel_type" class="form-input" onchange="this.style.color='#1C2C4A'">
                             <option value="Bensin">Bensin</option>
                             <option value="Pertamax">Pertamax</option>
                             <option value="Diesel">Diesel</option>
@@ -259,76 +302,98 @@
                             <option value="Hybrid">Hybrid</option>
                         </select>
                     </div>
+
                     <div>
-                        <label class="block text-xs md:text-sm font-bold text-[#4A6EB0] mb-1">Transmission</label>
-                        <select name="transmission" class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#4A6EB0]">
+                        <label class="form-label">Transmission</label>
+                        <select name="transmission" class="form-input" onchange="this.style.color='#1C2C4A'">
                             <option value="Automatik">Automatik</option>
                             <option value="Manual">Manual</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs md:text-sm font-bold text-[#4A6EB0] mb-1">Seat Count <span class="text-red-500">*</span></label>
-                        <input type="number" name="seats" placeholder="Example: 6" class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#4A6EB0]" required>
+                        <label class="form-label">Seat Count <span class="text-red-500">*</span></label>
+                        <input type="number" name="seats" placeholder="Example: 6" class="form-input" required>
                     </div>
+
+                    <!-- Ganti Field Duplicate Transmission (Date) di desain lu jadi gabungan Stock Qty & Tgl Servis -->
+                    <div>
+                        <label class="form-label">Stock / Qty <span class="text-red-500">*</span></label>
+                        <input type="number" name="stock" placeholder="Example: 5" value="1" min="1" class="form-input" required>
+                    </div>
+                    <div>
+                        <label class="form-label">Last Servis Date</label>
+                        <input type="date" name="service_date" class="form-input" style="color: #8CA1C4;" onchange="this.style.color='#1C2C4A'">
+                    </div>
+
                 </div>
                 
-                <div class="mb-6">
-                    <label class="block text-xs md:text-sm font-bold text-[#4A6EB0] mb-1">Car Pictures <span class="text-red-500">*</span></label>
-                    <div class="border-2 border-dashed border-[#8CA1C4] rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 relative h-32 md:h-40 overflow-hidden">
+                <div class="mb-8">
+                    <label class="form-label">Car Pictures <span class="text-red-500">*</span></label>
+                    <div class="border-2 border-dashed border-[#B2C5E5] rounded-2xl p-6 md:p-10 flex flex-col items-center justify-center cursor-pointer hover:bg-[#F4F7FC] transition relative h-40 md:h-48 overflow-hidden group">
                         <div id="upload-text" class="flex flex-col items-center pointer-events-none text-center">
-                            <i class="fa-solid fa-cloud-arrow-up text-2xl md:text-3xl text-[#4A6EB0] mb-2"></i>
-                            <p class="text-xs md:text-sm text-[#4A6EB0]">Click to upload or drag and drop</p>
-                            <p class="text-[10px] text-[#8CA1C4]">JPG, JPEG, PNG (max 2MB)</p>
+                            <i class="fa-solid fa-cloud-arrow-up text-4xl md:text-5xl text-[#6B85B5] mb-3 group-hover:scale-110 transition"></i>
+                            <p class="text-sm md:text-base text-[#6B85B5] font-medium">Klik to upload or drag and drop</p>
+                            <p class="text-xs text-[#8CA1C4] mt-1">JPG, JPEG, PNG (max size 200Mb)</p>
                         </div>
-                        <img id="image-preview" src="" class="hidden max-h-full max-w-full object-contain z-10 pointer-events-none">
+                        <img id="image-preview" src="" class="hidden max-h-full max-w-full object-contain z-10 pointer-events-none drop-shadow-md">
                         <input type="file" name="image" id="image-input" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" accept="image/*" required onchange="previewImage(event, 'image-preview', 'upload-text')">
                     </div>
                 </div>
 
-                <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 mt-6">
-                    <button type="button" onclick="toggleModal('addCarModal')" class="w-full sm:w-auto px-6 py-2.5 rounded-full border border-[#4A6EB0] text-[#4A6EB0] font-bold hover:bg-gray-50 transition text-sm">Cancel</button>
-                    <button type="submit" class="w-full sm:w-auto px-8 py-2.5 rounded-full bg-[#4A6EB0] text-white font-bold hover:bg-[#38558A] transition shadow-md text-sm">Add Car</button>
+                <div class="flex flex-col sm:flex-row justify-end gap-4 mt-8 pt-6 border-t border-gray-100">
+                    <button type="button" onclick="toggleModal('addCarModal')" class="w-full sm:w-auto px-10 py-3 rounded-full border-2 border-[#6B85B5] text-[#6B85B5] font-bold hover:bg-[#F4F7FC] transition text-sm md:text-base">Cancel</button>
+                    <button type="submit" class="w-full sm:w-auto px-12 py-3 rounded-full bg-[#5C72A6] text-white font-bold hover:bg-[#4A5D8A] transition shadow-lg text-sm md:text-base">Add Car</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <div id="editCarModal" class="fixed inset-0 z-[60] flex items-center justify-center opacity-0 pointer-events-none modal px-4">
+    <!-- MODAL EDIT CAR Sesuai Desain UI -->
+    <div id="editCarModal" class="fixed inset-0 z-[60] flex items-center justify-center opacity-0 pointer-events-none modal px-4 py-6">
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="toggleModal('editCarModal')"></div>
-        <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative shadow-2xl p-5 md:p-8 z-10 hide-scroll">
+        <div class="bg-white rounded-3xl w-full max-w-3xl max-h-[95vh] overflow-y-auto relative shadow-2xl p-6 md:p-10 z-10 hide-scroll border border-gray-100">
             
-            <div class="flex justify-between items-center mb-4 sticky top-0 bg-white z-20 pb-2 border-b border-gray-100">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-[#4A6EB0] rounded-full flex items-center justify-center text-white shrink-0"><i class="fa-solid fa-pen"></i></div>
+            <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-[#5C72A6] rounded-full flex items-center justify-center text-white shrink-0 shadow-md">
+                        <i class="fa-solid fa-plus text-xl"></i> <!-- Icon plus mengikuti mock up lu -->
+                    </div>
                     <div>
-                        <h2 class="text-lg md:text-xl font-bold text-[#4A6EB0]">Edit Car</h2>
-                        <p class="text-[10px] md:text-xs text-[#8CA1C4]">Update car data in the catalog</p>
+                        <h2 class="text-xl md:text-2xl font-bold text-[#5C72A6]">Edit Car</h2>
+                        <p class="text-xs md:text-sm text-[#8CA1C4]">Update car data in the catalog</p>
                     </div>
                 </div>
-                <button onclick="toggleModal('editCarModal')" class="text-[#8CA1C4] hover:text-red-500 text-xl md:text-2xl p-2"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-
-            <div class="flex justify-center mb-6 relative">
-                <div class="border border-gray-200 rounded-xl p-2 w-full sm:w-64 h-32 flex items-center justify-center bg-gray-50">
-                    <img id="edit_image_preview" src="" class="max-w-full max-h-full object-contain drop-shadow-sm">
-                </div>
+                <button onclick="toggleModal('editCarModal')" class="text-[#8CA1C4] hover:text-red-500 text-2xl p-2 transition"><i class="fa-solid fa-xmark"></i></button>
             </div>
 
             <form id="editCarForm" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                
+                <!-- Edit Image Preview Area -->
+                <div class="flex flex-col justify-center items-center mb-10 relative">
+                    <div class="border border-[#B2C5E5] rounded-2xl p-4 w-full sm:w-[400px] h-48 flex items-center justify-center bg-white mb-5 shadow-sm relative overflow-hidden">
+                        <img id="edit_image_preview" src="" class="max-w-full max-h-full object-contain drop-shadow-md z-10">
+                    </div>
+                    <label class="bg-[#5C72A6] text-white px-8 py-2.5 rounded-full font-bold cursor-pointer hover:bg-[#4A5D8A] transition text-sm md:text-base shadow-md">
+                        Edit Image
+                        <input type="file" name="image" id="edit-image-input" class="hidden" accept="image/*" onchange="previewEditImage(event)">
+                    </label>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5 mb-8">
                     <div>
-                        <label class="block text-xs md:text-sm font-bold text-[#4A6EB0] mb-1">Car Models <span class="text-red-500">*</span></label>
-                        <input type="text" id="edit_name" name="name" class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#4A6EB0]" required>
+                        <label class="form-label">Car Models <span class="text-red-500">*</span></label>
+                        <input type="text" id="edit_name" name="name" class="form-input" required>
                     </div>
                     <div>
-                        <label class="block text-xs md:text-sm font-bold text-[#4A6EB0] mb-1">Number plate <span class="text-red-500">*</span></label>
-                        <input type="text" id="edit_plate" name="license_plate" class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#4A6EB0]" required>
+                        <label class="form-label">Number plate <span class="text-red-500">*</span></label>
+                        <input type="text" id="edit_plate" name="license_plate" class="form-input" required>
                     </div>
+
                     <div>
-                        <label class="block text-xs md:text-sm font-bold text-[#4A6EB0] mb-1">Category</label>
-                        <select id="edit_category" name="category" class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#4A6EB0]">
+                        <label class="form-label">Category</label>
+                        <select id="edit_category" name="category" class="form-input" style="color:#1C2C4A;">
                             <option value="SUV">SUV</option>
                             <option value="MPV">MPV</option>
                             <option value="Prem SUV">Prem SUV</option>
@@ -337,28 +402,30 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs md:text-sm font-bold text-[#4A6EB0] mb-1">Status</label>
-                        <select id="edit_status" name="status" class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#4A6EB0]">
+                        <label class="form-label">Status</label>
+                        <select id="edit_status" name="status" class="form-input" style="color:#1C2C4A;">
                             <option value="Tersedia">Tersedia</option>
                             <option value="Disewa">Disewa</option>
                             <option value="Maintenance">Maintenance</option>
                         </select>
                     </div>
+
                     <div>
-                        <label class="block text-xs md:text-sm font-bold text-[#4A6EB0] mb-1">Price/Day (Rp) <span class="text-red-500">*</span></label>
-                        <input type="number" id="edit_price" name="price_per_day" class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#4A6EB0]" required>
+                        <label class="form-label">Price per Day (Rp) <span class="text-red-500">*</span></label>
+                        <input type="number" id="edit_price" name="price_per_day" class="form-input" required>
                     </div>
                     <div>
-                        <label class="block text-xs md:text-sm font-bold text-[#4A6EB0] mb-1">Year <span class="text-red-500">*</span></label>
-                        <input type="number" id="edit_year" name="year" class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#4A6EB0]" required>
+                        <label class="form-label">Year <span class="text-red-500">*</span></label>
+                        <input type="number" id="edit_year" name="year" class="form-input" required>
+                    </div>
+
+                    <div>
+                        <label class="form-label">Color <span class="text-red-500">*</span></label>
+                        <input type="text" id="edit_color" name="color" class="form-input" required>
                     </div>
                     <div>
-                        <label class="block text-xs md:text-sm font-bold text-[#4A6EB0] mb-1">Color <span class="text-red-500">*</span></label>
-                        <input type="text" id="edit_color" name="color" class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#4A6EB0]" required>
-                    </div>
-                    <div>
-                        <label class="block text-xs md:text-sm font-bold text-[#4A6EB0] mb-1">Fuel</label>
-                        <select id="edit_fuel" name="fuel_type" class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#4A6EB0]">
+                        <label class="form-label">Fuel</label>
+                        <select id="edit_fuel" name="fuel_type" class="form-input" style="color:#1C2C4A;">
                             <option value="Bensin">Bensin</option>
                             <option value="Pertamax">Pertamax</option>
                             <option value="Diesel">Diesel</option>
@@ -366,32 +433,38 @@
                             <option value="Hybrid">Hybrid</option>
                         </select>
                     </div>
+
                     <div>
-                        <label class="block text-xs md:text-sm font-bold text-[#4A6EB0] mb-1">Transmission</label>
-                        <select id="edit_transmission" name="transmission" class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#4A6EB0]">
+                        <label class="form-label">Transmission</label>
+                        <select id="edit_transmission" name="transmission" class="form-input" style="color:#1C2C4A;">
                             <option value="Automatik">Automatik</option>
                             <option value="Manual">Manual</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs md:text-sm font-bold text-[#4A6EB0] mb-1">Seat Count <span class="text-red-500">*</span></label>
-                        <input type="number" id="edit_seats" name="seats" class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#4A6EB0]" required>
+                        <label class="form-label">Seat Count <span class="text-red-500">*</span></label>
+                        <input type="number" id="edit_seats" name="seats" class="form-input" required>
+                    </div>
+
+                    <div>
+                        <label class="form-label">Stock / Qty <span class="text-red-500">*</span></label>
+                        <input type="number" id="edit_stock" name="stock" class="form-input" required>
+                    </div>
+                    <div>
+                        <label class="form-label">Last Servis Date</label>
+                        <input type="date" id="edit_service_date" name="service_date" class="form-input" style="color:#1C2C4A;">
                     </div>
                 </div>
-                
-                <div class="mb-6">
-                    <label class="block text-xs md:text-sm font-bold text-[#4A6EB0] mb-1">Change Picture <span class="text-[10px] text-gray-400 font-normal">(Optional)</span></label>
-                    <input type="file" name="image" class="w-full border border-gray-200 rounded-lg p-2 text-sm focus:outline-none" accept="image/*">
-                </div>
 
-                <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 mt-6">
-                    <button type="button" onclick="toggleModal('editCarModal')" class="w-full sm:w-auto px-6 py-2.5 rounded-full border border-[#4A6EB0] text-[#4A6EB0] font-bold hover:bg-gray-50 transition text-sm">Cancel</button>
-                    <button type="submit" class="w-full sm:w-auto px-8 py-2.5 rounded-full bg-[#4A6EB0] text-white font-bold hover:bg-[#38558A] transition shadow-md text-sm">Save Changes</button>
+                <div class="flex flex-col-reverse sm:flex-row justify-end gap-4 mt-8 pt-6 border-t border-gray-100">
+                    <button type="button" onclick="toggleModal('editCarModal')" class="w-full sm:w-auto px-10 py-3 rounded-full border-2 border-[#6B85B5] text-[#6B85B5] font-bold hover:bg-[#F4F7FC] transition text-sm md:text-base">Cancel</button>
+                    <button type="submit" class="w-full sm:w-auto px-12 py-3 rounded-full bg-[#5C72A6] text-white font-bold hover:bg-[#4A5D8A] transition shadow-lg text-sm md:text-base">Save</button>
                 </div>
             </form>
         </div>
     </div>
 
+    <!-- MODAL DELETE CAR -->
     <div id="deleteCarModal" class="fixed inset-0 z-[60] flex items-center justify-center opacity-0 pointer-events-none modal px-4">
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="toggleModal('deleteCarModal')"></div>
         <div class="bg-white rounded-2xl w-full max-w-sm md:max-w-md relative shadow-2xl p-6 md:p-8 z-10 text-center">
@@ -468,6 +541,20 @@
             }
         }
 
+        // Preview Image Form Edit
+        function previewEditImage(event) {
+            const input = event.target;
+            const preview = document.getElementById('edit_image_preview');
+
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
         // Setup Data Modal Edit
         function openEditModal(car) {
             document.getElementById('editCarForm').action = `/admin/catalog/${car.id}`;
@@ -476,13 +563,19 @@
             document.getElementById('edit_category').value = car.category;
             document.getElementById('edit_status').value = car.status;
             document.getElementById('edit_price').value = car.price_per_day;
+            document.getElementById('edit_stock').value = car.stock !== null ? car.stock : 1;
             document.getElementById('edit_year').value = car.year;
             document.getElementById('edit_color').value = car.color;
             document.getElementById('edit_fuel').value = car.fuel_type;
             document.getElementById('edit_transmission').value = car.transmission;
             document.getElementById('edit_seats').value = car.seats;
+            // Handle service date jika ada
+            if(car.service_date) {
+                document.getElementById('edit_service_date').value = car.service_date.split('T')[0];
+            }
             
             document.getElementById('edit_image_preview').src = `/${car.image_path}`;
+            document.getElementById('edit-image-input').value = ""; // reset file input
             
             toggleModal('editCarModal');
         }

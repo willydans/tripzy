@@ -14,12 +14,22 @@ class Booking extends Model
 
     // Casting agar tipe data gampang dikelola oleh Laravel
     protected $casts = [
-        'start_date'  => 'date',
-        'end_date'    => 'date',
-        'duration'    => 'integer', // 👈 Tambahan biar dijamin masuk sbg angka
-        'total_price' => 'integer', // 👈 Tambahan biar dijamin masuk sbg angka
-        'with_driver' => 'boolean',
-        'verified_at' => 'datetime',
+        'start_date'    => 'date',
+        'end_date'      => 'date',
+        'duration'      => 'integer',
+        'total_price'   => 'integer',
+        'with_driver'   => 'boolean',
+        'verified_at'   => 'datetime',
+        
+        // 👇 TAMBAHAN CASTING UNTUK FITUR RETURN INSPECTION 👇
+        'chk_scratches' => 'boolean',
+        'chk_lights'    => 'boolean',
+        'chk_toolkit'   => 'boolean',
+        'chk_sparetire' => 'boolean',
+        'mileage'       => 'integer',
+        'delay_hours'   => 'integer',
+        'damage_fine'   => 'integer',
+        'late_fine'     => 'integer',
     ];
 
     // Relasi balik ke tabel Users

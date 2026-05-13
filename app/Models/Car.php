@@ -9,11 +9,14 @@ class Car extends Model
 {
     use HasFactory;
 
+    // Mengizinkan semua kolom diisi kecuali ID
     protected $guarded = ['id'];
 
-    // Cast 'facilities' jadi Array biar gampang di-looping di Blade
+    // Cast tipe data biar gampang diolah
     protected $casts = [
-        'facilities' => 'array', 
+        'facilities'   => 'array',   // Cast json dari DB jadi Array
+        'stock'        => 'integer', // Pastikan stock terbaca sebagai angka
+        'service_date' => 'date',    // Otomatis ubah jadi object Carbon (biar bisa ->format('Y-m-d'))
     ];
 
     public function bookings()

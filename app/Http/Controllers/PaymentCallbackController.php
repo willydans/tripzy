@@ -27,15 +27,15 @@ class PaymentCallbackController extends Controller
         // Menggabungkan kembali bagian "ODR" dan kode uniknya (tanpa time)
         $bookingCode = $orderIdParts[0] . '-' . $orderIdParts[1]; 
 
-        // 3. Mencari data pesanan di dalam database
-        $booking = Booking::where('booking_code', $bookingCode)->first();
+        // 3. Mencari data pesanan di dalam database (di-load bareng relasi 'car')
+        $booking = Booking::with('car')->where('booking_code', $bookingCode)->first();
 
         // Jika pesanan tidak ditemukan, kembalikan response error agar Midtrans tahu
         if (!$booking) {
             return response()->json(['message' => 'Pesanan tidak ditemukan'], 404);
         }
 
-        // 4. Logika Pembaruan Status Otomatis
+        // 4. Logika Pembaruan Status Otomatis & Manajemen Stok Mobil
         if ($transactionStatus == 'capture' || $transactionStatus == 'settlement') {
             if ($fraudStatus == 'challenge') {
                 // Jika pembayaran mencurigakan dan ditahan oleh fraud detection system Midtrans
@@ -43,11 +43,28 @@ class PaymentCallbackController extends Controller
                     'payment_status' => 'Pending',
                 ]);
             } else {
-                // Jika pembayaran berhasil dan terverifikasi
-                $booking->update([
-                    'status' => 'Ongoing',
-                    'payment_status' => 'Paid',
-                ]);
+                // SAFETY CHECK: Pastikan booking belum berstatus Paid biar stok gak kepotong 2x
+                // jika Midtrans mengirimkan notifikasi lebih dari sekali.
+                if ($booking->payment_status != 'Paid') {
+                    
+                    // Jika pembayaran berhasil dan terverifikasi
+                    $booking->update([
+                        'status' => 'Ongoing',
+                        'payment_status' => 'Paid',
+                    ]);
+
+                    // --- LOGIKA INVENTORY / STOK ---
+                    $car = $booking->car;
+                    if ($car && $car->stock > 0) {
+                        // Kurangi jumlah stok 1
+                        $car->decrement('stock');
+                        
+                        // Kalau setelah dikurangi ternyata stoknya habis (0), otomatis ubah status mobil jadi 'Disewa'
+                        if ($car->stock <= 0) {
+                            $car->update(['status' => 'Disewa']);
+                        }
+                    }
+                }
             }
         } else if ($transactionStatus == 'cancel' || $transactionStatus == 'deny' || $transactionStatus == 'expire') {
             // Jika pembayaran dibatalkan pengguna, ditolak, atau kedaluwarsa (lewat batas waktu QRIS)

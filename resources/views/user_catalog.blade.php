@@ -73,6 +73,26 @@
 </head>
 <body class="flex flex-col min-h-screen">
 
+    <!-- TOAST NOTIFICATION ERROR (Menangkap lemparan dari Controller jika stok habis) -->
+    @if(session('error'))
+    <div id="errorToast" class="fixed top-24 md:top-10 left-1/2 transform -translate-x-1/2 z-[100] transition-all duration-500 ease-in-out w-11/12 md:w-auto">
+        <div class="bg-red-500/90 backdrop-blur-md border border-red-400 px-6 md:px-10 py-4 md:py-5 rounded-2xl shadow-2xl flex flex-col md:flex-row items-center gap-3 md:gap-4 relative w-full md:min-w-[400px]">
+            <button onclick="closeErrorToast()" class="absolute top-2 right-4 text-white/80 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white text-xl shadow-inner shrink-0">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <p class="text-sm md:text-base font-bold text-center md:text-left tracking-wide text-white pr-4">{{ session('error') }}</p>
+        </div>
+    </div>
+    <script>
+        setTimeout(() => closeErrorToast(), 5000);
+        function closeErrorToast() {
+            const toast = document.getElementById('errorToast');
+            if(toast) { toast.style.opacity = '0'; toast.style.transform = 'translate(-50%, -20px)'; setTimeout(() => toast.remove(), 500); }
+        }
+    </script>
+    @endif
+
     <nav class="fixed top-0 md:top-6 left-0 right-0 z-50 px-4 md:px-8 py-4 md:py-0 flex flex-col md:flex-row justify-between items-center gap-4 md:gap-0 max-w-7xl mx-auto w-full transition-all bg-[#171B2D]/90 md:bg-transparent backdrop-blur-md md:backdrop-blur-none">
         
         <div class="flex justify-between items-center w-full md:w-auto md:order-2">
@@ -226,10 +246,20 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6" id="catalogGrid">
                 
                 @foreach($cars as $car)
-                    <div class="car-card bg-gradient-to-b from-[#6D819C] to-[#4C5B79] rounded-3xl p-5 md:p-6 shadow-xl border border-white/5 flex flex-col justify-between" 
+                    <div class="car-card bg-gradient-to-b from-[#6D819C] to-[#4C5B79] rounded-3xl p-5 md:p-6 shadow-xl border border-white/5 flex flex-col justify-between relative overflow-hidden" 
                          data-category="{{ strtolower($car->category) }}" 
                          data-name="{{ strtolower($car->name) }}">
-                        <div>
+                        
+                        <!-- 🟢 OVERLAY STOK KOSONG -->
+                        @if($car->stock <= 0)
+                            <div class="absolute inset-0 bg-[#171B2D]/70 backdrop-blur-[2px] z-20 flex items-center justify-center pointer-events-none">
+                                <span class="bg-red-500 text-white px-5 py-2 rounded-full font-bold text-sm uppercase tracking-wider transform -rotate-12 border-2 border-white/20 shadow-2xl">
+                                    Habis Disewa
+                                </span>
+                            </div>
+                        @endif
+
+                        <div class="relative z-10">
                             <img src="{{ asset($car->image_path) }}" alt="{{ $car->name }}" class="w-full h-32 md:h-40 object-contain drop-shadow-2xl mb-4">
                             <div class="flex justify-between items-end mb-4">
                                 <div class="w-2/3 pr-2">
@@ -247,9 +277,19 @@
                                 </div>
                             </div>
                         </div>
-                        <a href="{{ route('user.car.detail', $car->slug) }}" class="block w-full py-2 md:py-2.5 rounded-full bg-gradient-to-r from-white/30 to-white/10 border border-white/30 text-white text-center text-sm md:text-base font-bold shadow-md hover:bg-white/40 transition backdrop-blur-md mt-2">
-                            Book Now
-                        </a>
+
+                        <!-- 🟢 LOGIKA TOMBOL BOOKING -->
+                        <div class="relative z-30">
+                            @if($car->stock > 0)
+                                <a href="{{ route('user.car.detail', $car->slug) }}" class="block w-full py-2 md:py-2.5 rounded-full bg-gradient-to-r from-white/30 to-white/10 border border-white/30 text-white text-center text-sm md:text-base font-bold shadow-md hover:bg-white/40 transition backdrop-blur-md mt-2">
+                                    Book Now
+                                </a>
+                            @else
+                                <button disabled class="block w-full py-2 md:py-2.5 rounded-full bg-white/10 border border-white/10 text-white/50 text-center text-sm md:text-base font-bold cursor-not-allowed mt-2">
+                                    Stock Kosong
+                                </button>
+                            @endif
+                        </div>
                     </div>
                 @endforeach
 

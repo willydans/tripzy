@@ -47,8 +47,15 @@ class OrderController extends Controller
             'total_price' => 'required|numeric'
         ]);
 
+        // 2. CEK STOK MOBIL (Inventory Management)
+        $car = Car::findOrFail($request->car_id);
+        if ($car->stock <= 0) {
+            // Jika stok habis, kembalikan user ke katalog dengan pesan error
+            return redirect()->route('user.catalog')->with('error', 'Waduh, keduluan! Mobil ' . $car->name . ' baru saja habis disewa pengguna lain. Silakan pilih mobil yang lain.');
+        }
+
         try {
-            // 2. Upload Dokumen ke Storage (Cek ketersediaan file)
+            // 3. Upload Dokumen ke Storage (Cek ketersediaan file)
             $ktpPath = null;
             if ($request->hasFile('doc_ktp')) {
                 $ktpPath = $request->file('doc_ktp')->store('bookings', 'public');
@@ -62,15 +69,15 @@ class OrderController extends Controller
                 $passportPath = $request->file('doc_passport')->store('bookings', 'public');
             }
 
-            // 3. Kalkulasi End Date
+            // 4. Kalkulasi End Date
             $startDate = Carbon::parse($request->start_date);
             $endDate = $startDate->copy()->addDays($request->duration - 1); 
 
-            // 4. Generate Kode Booking
+            // 5. Generate Kode Booking
             $bookingCode = 'ODR-' . strtoupper(uniqid());
             $withDriver = $request->has('with_driver') && $request->with_driver == 1 ? true : false;
 
-            // 5. Simpan ke Database
+            // 6. Simpan ke Database
             $booking = Booking::create([
                 'booking_code' => $bookingCode,
                 'user_id' => Auth::id(),
@@ -145,7 +152,7 @@ class OrderController extends Controller
                 'email' => Auth::user()->email,
                 'phone' => $booking->renter_phone,
             ],
-            // 👇 UPDATE DI SINI: Gunakan parameter resmi Midtrans untuk memunculkan QRIS
+            // Gunakan parameter resmi Midtrans untuk memunculkan QRIS
             'enabled_payments' => ['gopay', 'other_qris'], 
         ];
 
@@ -161,10 +168,19 @@ class OrderController extends Controller
     // ----------------------------------------------------
     public function cancel($id)
     {
-        $booking = Booking::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+        $booking = Booking::with('car')->where('id', $id)->where('user_id', Auth::id())->firstOrFail();
         
         if ($booking->status == 'Pending Payment' || $booking->status == 'Ordered') {
             
+            // LOGIKA INVENTORY: Jika user membatalkan pesanan yang sudah dibayar (stok sudah terpotong)
+            if (in_array($booking->payment_status, ['Paid', 'Settlement'])) {
+                $car = $booking->car;
+                if ($car) {
+                    $car->increment('stock'); // Kembalikan stok mobil
+                    $car->update(['status' => 'Tersedia']); // Pastikan status kembali tersedia
+                }
+            }
+
             // Hanya ubah status booking, payment_status dibiarkan agar tidak terjadi bentrok constraint database
             $booking->update([
                 'status' => 'Cancelled'

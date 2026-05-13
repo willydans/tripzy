@@ -25,6 +25,8 @@ class AdminCarController extends Controller
             'category' => 'required|string',
             'status' => 'required|string',
             'price_per_day' => 'required|integer',
+            'stock' => 'required|integer|min:0', // <-- Validasi Stock
+            'service_date' => 'nullable|date', // <-- Validasi Tanggal Servis
             'year' => 'required|string',
             'color' => 'required|string',
             'fuel_type' => 'required|string',
@@ -43,6 +45,8 @@ class AdminCarController extends Controller
             'slug' => Str::slug($request->name . '-' . Str::random(5)),
             'description' => 'Kenyamanan berkendara dengan ' . $request->name, // Default text
             'price_per_day' => $request->price_per_day,
+            'stock' => $request->stock, // <-- Simpan Stock
+            'service_date' => $request->service_date, // <-- Simpan Tanggal Servis
             'image_path' => $imagePath,
             'year' => $request->year,
             'transmission' => $request->transmission,
@@ -66,6 +70,8 @@ class AdminCarController extends Controller
             'name' => 'required|string|max:255',
             'license_plate' => 'required|string|max:255',
             'price_per_day' => 'required|integer',
+            'stock' => 'required|integer|min:0', // <-- Validasi Stock
+            'service_date' => 'nullable|date', // <-- Validasi Tanggal Servis
             'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
@@ -86,6 +92,8 @@ class AdminCarController extends Controller
         $car->category = $request->category;
         $car->status = $request->status;
         $car->price_per_day = $request->price_per_day;
+        $car->stock = $request->stock; // <-- Update Stock
+        $car->service_date = $request->service_date; // <-- Update Tanggal Servis
         $car->year = $request->year;
         $car->color = $request->color;
         $car->fuel_type = $request->fuel_type;
