@@ -6,6 +6,10 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;       // 👈 Import DB Facade buat query otp_codes
+use Illuminate\Support\Facades\Mail;     // 👈 Import Mail Facade
+use App\Mail\SendOtpMail;                // 👈 Import Mailable Class lu
+use Carbon\Carbon;                       // 👈 Import Carbon buat ngitung waktu expired
 
 class AuthController extends Controller
 {
@@ -103,5 +107,73 @@ class AuthController extends Controller
         
         // Habis logout, balikin dia ke landing page (home)
         return redirect()->route('home');
+    }
+
+    // ==========================================
+    // FUNGSI UNTUK RESET PASSWORD VIA OTP
+    // ==========================================
+
+    // 1. Fungsi Kirim OTP
+    public function sendOtp(Request $request)
+    {
+        $request->validate(['email' => 'required|email|exists:users,email']);
+
+        $otp = rand(100000, 999999); // Generate 6 digit angka random
+        
+        // Simpan atau update ke tabel otp_codes (biar ga numpuk datanya)
+        DB::table('otp_codes')->updateOrInsert(
+            ['email' => $request->email],
+            [
+                'otp' => $otp, 
+                'expires_at' => Carbon::now()->addMinutes(10), // Expired dalam 10 menit
+                'created_at' => now(), 
+                'updated_at' => now()
+            ]
+        );
+
+        // Kirim email pake Mailtrap / SMTP
+        Mail::to($request->email)->send(new SendOtpMail($otp));
+
+        return response()->json(['success' => true, 'message' => 'OTP berhasil dikirim ke email.']);
+    }
+
+    // 2. Fungsi Validasi OTP
+    public function verifyOtp(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email', 
+            'otp' => 'required|string'
+        ]);
+
+        $record = DB::table('otp_codes')
+                    ->where('email', $request->email)
+                    ->where('otp', $request->otp)
+                    ->first();
+
+        // Cek kalau kode OTP nya gak ada ATAU udah lebih dari 10 menit (expired)
+        if (!$record || Carbon::parse($record->expires_at)->isPast()) {
+            return response()->json(['success' => false, 'message' => 'Kode OTP salah atau sudah kedaluwarsa.'], 400);
+        }
+
+        return response()->json(['success' => true, 'message' => 'OTP valid.']);
+    }
+
+    // 3. Fungsi Simpan Password Baru
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|min:8|confirmed' // Harus sama dengan form input konfirmasi password
+        ]);
+
+        // Ganti password di tabel users
+        User::where('email', $request->email)->update([
+            'password' => Hash::make($request->password)
+        ]);
+        
+        // Hapus jejak OTP biar aman dan gak disalahgunain lagi
+        DB::table('otp_codes')->where('email', $request->email)->delete(); 
+
+        return response()->json(['success' => true, 'message' => 'Password berhasil diubah!']);
     }
 }

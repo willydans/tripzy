@@ -57,6 +57,11 @@ Route::middleware('guest')->group(function () {
     Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
     Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
 
+    // 🟢 ROUTES FORGOT PASSWORD (OTP) 🟢
+    Route::post('/forgot-password/send-otp', [AuthController::class, 'sendOtp']);
+    Route::post('/forgot-password/verify-otp', [AuthController::class, 'verifyOtp']);
+    Route::post('/forgot-password/reset', [AuthController::class, 'resetPassword']);
+
 });
 
 
