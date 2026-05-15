@@ -33,6 +33,7 @@ class User extends Authenticatable
         'masa_berlaku_sim',
         'profile_photo',
         'status', // 👈 Tambahan field status biar bisa diupdate
+        'google_id', // 👈 TAMBAHAN: Biar data ID dari Google bisa disimpen
     ];
 
     /**

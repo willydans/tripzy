@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Auth\GoogleController; // 👈 Import controller Google Socialite
 use App\Http\Controllers\AdminController; 
 use App\Http\Controllers\AdminCarController; 
 use App\Http\Controllers\AdminBookingController; 
@@ -9,7 +10,7 @@ use App\Http\Controllers\AdminTransactionController;
 use App\Http\Controllers\AdminUserController; 
 use App\Http\Controllers\OrderController; 
 use App\Http\Controllers\ProfileController; 
-use App\Http\Controllers\PaymentCallbackController; // 👈 Import controller Webhook Midtrans
+use App\Http\Controllers\PaymentCallbackController;
 use App\Models\Car; 
 
 /*
@@ -46,11 +47,15 @@ Route::middleware('guest')->group(function () {
     Route::get('/destination', function () { return view('destination'); })->name('destination');
     Route::get('/contact', function () { return view('contact'); })->name('contact');
 
-    // Auth Pages (Login & Register)
+    // Auth Pages (Login & Register Manual)
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'processLogin']);
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'processRegister']);
+
+    // 🟢 ROUTES OAUTH GOOGLE LOGIN/REGISTER 🟢
+    Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
+    Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
 
 });
 

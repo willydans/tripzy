@@ -7,6 +7,7 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         body { font-family: 'Poppins', sans-serif; }
@@ -57,9 +58,9 @@
                     </div>
                 @endif
 
-                @if ($errors->any())
+                @if ($errors->any() || session('error'))
                     <div class="bg-red-100 text-red-600 p-3 rounded-lg mb-4 text-xs md:text-sm text-center font-medium shadow-sm border border-red-200">
-                        {{ $errors->first() }}
+                        {{ session('error') ?? $errors->first() }}
                     </div>
                 @endif
 
@@ -70,7 +71,7 @@
                     
                     <input type="password" name="password" placeholder="Password" class="input-glass w-full rounded-lg py-2.5 md:py-3 px-4 mb-4 text-[#1C2C4A] font-medium text-sm md:text-base" required>
                     
-                    <div class="flex justify-between items-center text-[10px] md:text-xs text-white mb-8 md:mb-10 font-medium opacity-90">
+                    <div class="flex justify-between items-center text-[10px] md:text-xs text-white mb-6 font-medium opacity-90">
                         <label class="flex items-center gap-2 cursor-pointer hover:text-blue-200 transition">
                             <input type="checkbox" name="remember" class="rounded w-3 h-3 border-none bg-white/50 text-blue-500 focus:ring-0 cursor-pointer"> 
                             Remember me
@@ -78,10 +79,21 @@
                         <a href="#" class="hover:text-blue-200 transition">Forgot Password?</a>
                     </div>
                     
-                    <div class="flex justify-center">
-                        <button type="submit" class="bg-[#B3CBF2] text-white font-semibold py-2.5 px-10 md:px-12 rounded-full hover:bg-white hover:text-[#4A6EB0] transition duration-300 shadow-md text-sm md:text-base w-full md:w-auto">
+                    <div class="flex flex-col items-center gap-4 mt-2">
+                        <button type="submit" class="bg-[#B3CBF2] text-white font-semibold py-2.5 px-10 md:px-12 rounded-full hover:bg-white hover:text-[#4A6EB0] transition duration-300 shadow-md text-sm md:text-base w-full">
                             Login
                         </button>
+
+                        <div class="w-full flex items-center justify-between opacity-70">
+                            <hr class="w-full border-white/30">
+                            <span class="p-2 text-white/80 text-[10px] font-medium tracking-widest">OR</span>
+                            <hr class="w-full border-white/30">
+                        </div>
+
+                        <a href="{{ route('google.login') }}" class="w-full flex items-center justify-center gap-3 py-2.5 rounded-full border border-white/40 text-white font-medium hover:bg-white/20 hover:border-white transition duration-300 shadow-sm text-sm md:text-base backdrop-blur-sm">
+                            <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5 drop-shadow-md" alt="Google">
+                            Continue with Google
+                        </a>
                     </div>
                 </form>
             </div>

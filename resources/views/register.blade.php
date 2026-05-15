@@ -6,6 +6,7 @@
     <title>Register - Tripzy</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { font-family: 'Poppins', sans-serif; }
         .bg-split { background: linear-gradient(135deg, #2D4875 0%, #080D1A 40%, #5672A1 100%); }
@@ -66,7 +67,8 @@
                 @endif
 
                 <form action="{{ route('register') }}" method="POST" class="flex flex-col gap-3 md:gap-4">
-                    @csrf <input type="text" name="name" placeholder="Nama Lengkap" value="{{ old('name') }}" class="input-glass w-full rounded-lg py-2.5 px-4 text-[#1C2C4A] font-medium text-xs md:text-sm" required>
+                    @csrf 
+                    <input type="text" name="name" placeholder="Nama Lengkap" value="{{ old('name') }}" class="input-glass w-full rounded-lg py-2.5 px-4 text-[#1C2C4A] font-medium text-xs md:text-sm" required>
                     <input type="email" name="email" placeholder="Email" value="{{ old('email') }}" class="input-glass w-full rounded-lg py-2.5 px-4 text-[#1C2C4A] font-medium text-xs md:text-sm" required>
                     <input type="tel" name="nomor_hp" placeholder="Nomor Hp" value="{{ old('nomor_hp') }}" class="input-glass w-full rounded-lg py-2.5 px-4 text-[#1C2C4A] font-medium text-xs md:text-sm" required>
                     
@@ -87,10 +89,21 @@
 
                     <input type="password" name="password" placeholder="Password" class="input-glass w-full rounded-lg py-2.5 px-4 text-[#1C2C4A] font-medium text-xs md:text-sm" required>
                     
-                    <div class="flex justify-center mt-2 md:mt-4">
-                        <button type="submit" class="bg-[#B3CBF2] text-white font-semibold py-2.5 px-10 md:px-12 rounded-full hover:bg-white hover:text-[#4A6EB0] transition duration-300 shadow-md text-sm md:text-base w-full md:w-auto">
+                    <div class="flex flex-col items-center mt-2 md:mt-4 gap-4">
+                        <button type="submit" class="bg-[#B3CBF2] text-white font-semibold py-2.5 px-10 md:px-12 rounded-full hover:bg-white hover:text-[#4A6EB0] transition duration-300 shadow-md text-sm md:text-base w-full">
                             Register
                         </button>
+
+                        <div class="w-full flex items-center justify-between opacity-70">
+                            <hr class="w-full border-white/30">
+                            <span class="p-2 text-white/80 text-[10px] font-medium tracking-widest">OR</span>
+                            <hr class="w-full border-white/30">
+                        </div>
+
+                        <a href="{{ route('google.login') }}" class="w-full flex items-center justify-center gap-3 py-2.5 rounded-full border border-white/40 text-white font-medium hover:bg-white/20 hover:border-white transition duration-300 shadow-sm text-sm md:text-base backdrop-blur-sm">
+                            <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5 drop-shadow-md" alt="Google">
+                            Continue with Google
+                        </a>
                     </div>
                 </form>
             </div>
