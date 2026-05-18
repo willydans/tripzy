@@ -73,7 +73,6 @@
 </head>
 <body class="flex flex-col min-h-screen">
 
-    <!-- TOAST NOTIFICATION ERROR (Menangkap lemparan dari Controller jika stok habis) -->
     @if(session('error'))
     <div id="errorToast" class="fixed top-24 md:top-10 left-1/2 transform -translate-x-1/2 z-[100] transition-all duration-500 ease-in-out w-11/12 md:w-auto">
         <div class="bg-red-500/90 backdrop-blur-md border border-red-400 px-6 md:px-10 py-4 md:py-5 rounded-2xl shadow-2xl flex flex-col md:flex-row items-center gap-3 md:gap-4 relative w-full md:min-w-[400px]">
@@ -232,11 +231,16 @@
                 <div class="w-full lg:w-auto overflow-x-auto hide-scroll rounded-full">
                     <div class="flex flex-nowrap lg:flex-wrap justify-start lg:justify-center items-center gap-2 text-xs md:text-sm font-medium text-[#8CA1C4] bg-white/5 border border-white/10 rounded-full px-2 py-1.5 backdrop-blur-md min-w-max" id="filterContainer">
                         <button class="filter-btn bg-white/10 text-white px-4 md:px-5 py-1.5 rounded-full shadow-sm font-semibold transition" data-filter="all">All</button>
-                        <button class="filter-btn px-3 md:px-4 py-1.5 hover:text-white transition rounded-full" data-filter="suv">SUV</button>
-                        <button class="filter-btn px-3 md:px-4 py-1.5 hover:text-white transition rounded-full" data-filter="mpv">MPV</button>
-                        <button class="filter-btn px-3 md:px-4 py-1.5 hover:text-white transition rounded-full whitespace-nowrap" data-filter="premium suv">Premium SUV</button>
-                        <button class="filter-btn px-3 md:px-4 py-1.5 hover:text-white transition rounded-full whitespace-nowrap" data-filter="premium mpv">Premium MPV</button>
-                        <button class="filter-btn px-3 md:px-4 py-1.5 hover:text-white transition rounded-full whitespace-nowrap" data-filter="luxury mpv & suv">Luxury MPV & SUV</button>
+                        @php
+                            // Ambil daftar kategori dinamis dari database biar anti bocor
+                            $categories = $cars->pluck('category')->unique();
+                        @endphp
+                        @foreach($categories as $category)
+                            @php
+                                $filterSlug = \Illuminate\Support\Str::slug($category);
+                            @endphp
+                            <button class="filter-btn px-3 md:px-4 py-1.5 hover:text-white transition rounded-full whitespace-nowrap" data-filter="{{ $filterSlug }}">{{ trim($category) }}</button>
+                        @endforeach
                     </div>
                 </div>
             </div>
@@ -246,11 +250,15 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6" id="catalogGrid">
                 
                 @foreach($cars as $car)
+                    @php
+                        // Format slug biar cocok mutlak sama filter
+                        $carCategorySlug = \Illuminate\Support\Str::slug($car->category);
+                        $carNameSafe = trim(strtolower($car->name));
+                    @endphp
                     <div class="car-card bg-gradient-to-b from-[#6D819C] to-[#4C5B79] rounded-3xl p-5 md:p-6 shadow-xl border border-white/5 flex flex-col justify-between relative overflow-hidden" 
-                         data-category="{{ strtolower($car->category) }}" 
-                         data-name="{{ strtolower($car->name) }}">
+                         data-category="{{ $carCategorySlug }}" 
+                         data-name="{{ $carNameSafe }}">
                         
-                        <!-- 🟢 OVERLAY STOK KOSONG -->
                         @if($car->stock <= 0)
                             <div class="absolute inset-0 bg-[#171B2D]/70 backdrop-blur-[2px] z-20 flex items-center justify-center pointer-events-none">
                                 <span class="bg-red-500 text-white px-5 py-2 rounded-full font-bold text-sm uppercase tracking-wider transform -rotate-12 border-2 border-white/20 shadow-2xl">
@@ -278,7 +286,6 @@
                             </div>
                         </div>
 
-                        <!-- 🟢 LOGIKA TOMBOL BOOKING -->
                         <div class="relative z-30">
                             @if($car->stock > 0)
                                 <a href="{{ route('user.car.detail', $car->slug) }}" class="block w-full py-2 md:py-2.5 rounded-full bg-gradient-to-r from-white/30 to-white/10 border border-white/30 text-white text-center text-sm md:text-base font-bold shadow-md hover:bg-white/40 transition backdrop-blur-md mt-2">
@@ -347,7 +354,7 @@
             }
         });
 
-        // LOGIKA FILTER & SEARCH DINAMIS (REAL-TIME)
+        // LOGIKA FILTER & SEARCH DINAMIS (REAL-TIME) - SUDAH FIX 100%
         document.addEventListener("DOMContentLoaded", function() {
             const filterBtns = document.querySelectorAll('.filter-btn');
             const searchInput = document.getElementById('searchInput');
@@ -365,7 +372,8 @@
                     const name = card.getAttribute('data-name');
                     
                     const matchesSearch = name.includes(currentSearch);
-                    const matchesFilter = (currentFilter === 'all' || category.includes(currentFilter) || currentFilter.includes(category));
+                    // 🟢 INI KUNCI FIX-NYA: Pakai '===' biar MPV nggak disamakan sama Premium MPV
+                    const matchesFilter = (currentFilter === 'all' || category === currentFilter);
 
                     if (matchesFilter && matchesSearch) {
                         card.classList.remove('hidden');
@@ -400,6 +408,7 @@
                     this.classList.add('bg-white/10', 'text-white', 'shadow-sm', 'font-semibold');
                     this.classList.remove('hover:text-white');
 
+                    // Filter sekarang pakai atribut khusus 'data-filter'
                     currentFilter = this.getAttribute('data-filter').toLowerCase();
                     filterCars();
                 });
@@ -407,7 +416,7 @@
 
             if(searchInput) {
                 searchInput.addEventListener('input', function(e) {
-                    currentSearch = e.target.value.toLowerCase();
+                    currentSearch = e.target.value.toLowerCase().trim();
                     filterCars();
                 });
             }

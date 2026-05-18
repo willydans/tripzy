@@ -232,7 +232,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                         <div>
                             <label class="block text-[#6C82A3] text-[10px] md:text-xs font-semibold uppercase tracking-wider mb-1 md:mb-2">DATE</label>
-                            <input type="date" name="start_date" class="form-input w-full rounded-md px-3 py-2 text-sm" required min="{{ date('Y-m-d') }}">
+                            <input type="date" name="start_date" id="start_date" class="form-input w-full rounded-md px-3 py-2 text-sm" required min="{{ date('Y-m-d') }}">
                         </div>
                         <div>
                             <label class="block text-[#6C82A3] text-[10px] md:text-xs font-semibold uppercase tracking-wider mb-1 md:mb-2">DURATION</label>
@@ -248,24 +248,26 @@
                         <label class="block text-[#6C82A3] text-[10px] md:text-xs font-semibold uppercase tracking-wider mb-1 md:mb-2">NAME</label>
                         <input type="text" name="renter_name" placeholder="Full Name (as per ID)" class="form-input w-full rounded-md px-3 py-2 text-sm" required value="{{ old('renter_name') }}">
                     </div>
+                    
                     <div class="mb-4">
                         <label class="block text-[#6C82A3] text-[10px] md:text-xs font-semibold uppercase tracking-wider mb-1 md:mb-2">PHONE NUMBER</label>
-                        <input type="text" name="renter_phone" placeholder="+6285-------" class="form-input w-full rounded-md px-3 py-2 text-sm" required value="{{ old('renter_phone') }}">
+                        <input type="text" name="renter_phone" placeholder="Contoh: 085278139801" class="form-input w-full rounded-md px-3 py-2 text-sm" required value="{{ old('renter_phone') }}" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                     </div>
                     <div class="mb-4">
                         <label class="block text-[#6C82A3] text-[10px] md:text-xs font-semibold uppercase tracking-wider mb-1 md:mb-2">ID NUMBER (KTP / PASSPORT)</label>
-                        <input type="text" name="renter_id_number" placeholder="1803---------" class="form-input w-full rounded-md px-3 py-2 text-sm" required value="{{ old('renter_id_number') }}">
+                        <input type="text" name="renter_id_number" placeholder="Contoh: 1803xxxxxxxxxxxx" class="form-input w-full rounded-md px-3 py-2 text-sm" required value="{{ old('renter_id_number') }}" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                     </div>
+                    
                     <div class="mb-6">
                         <label class="block text-[#6C82A3] text-[10px] md:text-xs font-semibold uppercase tracking-wider mb-1 md:mb-2">PICKUP TIME</label>
-                        <input type="time" name="pickup_time" class="form-input w-full rounded-md px-3 py-2 text-sm" required value="{{ old('pickup_time') }}">
+                        <input type="time" name="pickup_time" id="pickup_time" class="form-input w-full rounded-md px-3 py-2 text-sm" required value="{{ old('pickup_time') }}">
                     </div>
 
                     <div class="mb-3 md:mb-4">
                         <label class="block text-[#6C82A3] text-[10px] md:text-xs font-semibold uppercase tracking-wider mb-1">
                             RENTER DOCUMENTS <span class="normal-case text-[9px] md:text-[10px] text-gray-400 font-normal">(Max 10MB | JPG, PNG)</span>
                         </label>
-                        <p class="text-[9px] md:text-[10px] text-red-400 font-medium italic mb-2">*Wajib upload KTP atau Passport (salah satu)</p>
+                        <p class="text-[9px] md:text-[10px] text-red-400 font-medium italic mb-2">*Wajib upload KTP atau Passport (pilih salah satu)</p>
                     </div>
 
                     <div class="grid grid-cols-2 gap-2 md:gap-3 mb-6">
@@ -283,18 +285,6 @@
                         </label>
 
                         <label class="border border-[#323A56] rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-white/5 transition h-20 md:h-24 relative overflow-hidden group">
-                            <div id="text-sim" class="flex flex-col items-center gap-1 md:gap-2 pointer-events-none p-2 md:p-4 z-0">
-                                <i class="fa-solid fa-arrow-up-from-bracket text-[#D1D5DB] text-sm md:text-base"></i>
-                                <span class="text-[10px] md:text-xs text-center text-[#D1D5DB]">*Upload SIM</span>
-                            </div>
-                            <img id="preview-sim" src="" class="hidden absolute inset-0 w-full h-full object-cover z-10 pointer-events-none">
-                            <div id="overlay-sim" class="hidden absolute inset-0 bg-black/60 z-10 flex items-center justify-center pointer-events-none transition group-hover:bg-black/40">
-                                <span class="text-white font-bold text-[10px] md:text-xs tracking-widest">SIM</span>
-                            </div>
-                            <input type="file" name="doc_sim" class="absolute inset-0 opacity-0 cursor-pointer z-20" accept=".jpg,.jpeg,.png,image/jpeg,image/png" required onchange="previewDocument(event, 'preview-sim', 'text-sim', 'overlay-sim')">
-                        </label>
-
-                        <label class="border border-[#323A56] rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-white/5 transition h-20 md:h-24 relative overflow-hidden group">
                             <div id="text-passport" class="flex flex-col items-center gap-1 md:gap-2 pointer-events-none p-2 md:p-4 z-0">
                                 <i class="fa-solid fa-arrow-up-from-bracket text-[#D1D5DB] text-sm md:text-base"></i>
                                 <span class="text-[10px] md:text-xs text-center text-[#D1D5DB]">Passport</span>
@@ -304,6 +294,18 @@
                                 <span class="text-white font-bold text-[10px] md:text-xs tracking-widest">PASSPORT</span>
                             </div>
                             <input type="file" name="doc_passport" class="absolute inset-0 opacity-0 cursor-pointer z-20" accept=".jpg,.jpeg,.png,image/jpeg,image/png" onchange="previewDocument(event, 'preview-passport', 'text-passport', 'overlay-passport')">
+                        </label>
+
+                        <label class="border border-[#323A56] rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-white/5 transition h-20 md:h-24 relative overflow-hidden group">
+                            <div id="text-sim" class="flex flex-col items-center gap-1 md:gap-2 pointer-events-none p-2 md:p-4 z-0">
+                                <i class="fa-solid fa-arrow-up-from-bracket text-[#D1D5DB] text-sm md:text-base"></i>
+                                <span class="text-[10px] md:text-xs text-center text-[#D1D5DB]">*Upload SIM</span>
+                            </div>
+                            <img id="preview-sim" src="" class="hidden absolute inset-0 w-full h-full object-cover z-10 pointer-events-none">
+                            <div id="overlay-sim" class="hidden absolute inset-0 bg-black/60 z-10 flex items-center justify-center pointer-events-none transition group-hover:bg-black/40">
+                                <span class="text-white font-bold text-[10px] md:text-xs tracking-widest">SIM</span>
+                            </div>
+                            <input type="file" name="doc_sim" class="absolute inset-0 opacity-0 cursor-pointer z-20" accept=".jpg,.jpeg,.png,image/jpeg,image/png" required onchange="previewDocument(event, 'preview-sim', 'text-sim', 'overlay-sim')">
                         </label>
 
                         <label class="border border-[#323A56] rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-white/5 transition h-20 md:h-24 relative overflow-hidden group">
@@ -402,18 +404,63 @@
             }
         });
 
-        // Validasi KTP atau Passport Saat Submit Form
+        // 🟢 FIX: Validasi Waktu Pickup
+        function checkPickupTime() {
+            const dateInput = document.getElementById('start_date');
+            const timeInput = document.getElementById('pickup_time');
+            
+            if (!dateInput.value || !timeInput.value) return true;
+
+            const now = new Date();
+            const selectedDate = new Date(dateInput.value);
+            
+            // Format waktu saat ini untuk komparasi YYYY-MM-DD
+            const currentYear = now.getFullYear();
+            const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
+            const currentDay = String(now.getDate()).padStart(2, '0');
+            const todayStr = `${currentYear}-${currentMonth}-${currentDay}`;
+
+            // Jika tanggal yang dipilih adalah hari ini
+            if (dateInput.value === todayStr) {
+                const currentHours = String(now.getHours()).padStart(2, '0');
+                const currentMinutes = String(now.getMinutes()).padStart(2, '0');
+                const currentTimeStr = `${currentHours}:${currentMinutes}`;
+
+                if (timeInput.value < currentTimeStr) {
+                    alert('Peringatan: Waktu pickup untuk hari ini tidak boleh di masa lalu (sebelum jam ' + currentTimeStr + ')!');
+                    timeInput.value = currentTimeStr; // Reset ke jam saat ini
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        document.getElementById('start_date').addEventListener('change', checkPickupTime);
+        document.getElementById('pickup_time').addEventListener('change', checkPickupTime);
+
+
+        // 🟢 FIX: Validasi KTP atau Passport Saat Submit Form
         document.getElementById('bookingForm').addEventListener('submit', function(e) {
+            // Validasi Waktu
+            if (!checkPickupTime()) {
+                e.preventDefault();
+                return;
+            }
+
+            // Validasi KTP/Passport
             const ktpInput = document.querySelector('input[name="doc_ktp"]');
             const passportInput = document.querySelector('input[name="doc_passport"]');
 
             if (ktpInput.files.length === 0 && passportInput.files.length === 0) {
                 e.preventDefault();
                 alert('Peringatan: Anda WAJIB mengunggah KTP atau Passport! (Pilih salah satu)');
+            } else if (ktpInput.files.length > 0 && passportInput.files.length > 0) {
+                e.preventDefault();
+                alert('Peringatan: Anda hanya boleh mengunggah SALAH SATU (KTP saja ATAU Passport saja), tidak boleh keduanya!');
             }
         });
 
-        // Fungsi preview dokumen upload
+        // 🟢 FIX: Fungsi preview dokumen upload saling membersihkan (Mutually Exclusive)
         function previewDocument(event, previewId, textId, overlayId) {
             const input = event.target;
             const preview = document.getElementById(previewId);
@@ -434,6 +481,23 @@
                     alert("Gagal: Ukuran file terlalu besar! Maksimal 10 MB.");
                     input.value = ""; 
                     return;
+                }
+
+                // Logika membersihkan jika user pilih input yang satunya
+                if (input.name === 'doc_ktp') {
+                    const passInput = document.querySelector('input[name="doc_passport"]');
+                    passInput.value = '';
+                    document.getElementById('preview-passport').src = '';
+                    document.getElementById('preview-passport').classList.add('hidden');
+                    document.getElementById('text-passport').classList.remove('hidden');
+                    document.getElementById('overlay-passport').classList.add('hidden');
+                } else if (input.name === 'doc_passport') {
+                    const ktpInput = document.querySelector('input[name="doc_ktp"]');
+                    ktpInput.value = '';
+                    document.getElementById('preview-ktp').src = '';
+                    document.getElementById('preview-ktp').classList.add('hidden');
+                    document.getElementById('text-ktp').classList.remove('hidden');
+                    document.getElementById('overlay-ktp').classList.add('hidden');
                 }
 
                 const reader = new FileReader();

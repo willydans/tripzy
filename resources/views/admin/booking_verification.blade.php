@@ -134,17 +134,23 @@
             <div class="flex flex-col md:flex-row gap-3 md:gap-4 mb-6">
                 <div class="relative flex-grow w-full lg:max-w-md">
                     <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-[#8CA1C4]"></i>
-                    <input type="text" placeholder="Search...." class="w-full bg-[#DCE4F2] text-[#4A6EB0] placeholder-[#8CA1C4] rounded-full py-2.5 pl-12 pr-4 focus:outline-none transition text-sm">
+                    <input type="text" id="searchInput" placeholder="Search by name, car, or code...." class="w-full bg-[#DCE4F2] text-[#4A6EB0] placeholder-[#8CA1C4] rounded-full py-2.5 pl-12 pr-4 focus:outline-none transition text-sm">
                 </div>
                 <div class="flex gap-2 overflow-x-auto hide-scroll pb-1">
-                    <select class="bg-[#DCE4F2] text-[#4A6EB0] text-sm md:text-base font-medium rounded-full py-2.5 px-5 appearance-none pr-8 relative bg-no-repeat bg-[right_1rem_center] bg-[length:1em_1em] whitespace-nowrap outline-none">
-                        <option>All Statuses</option>
+                    <select id="statusFilter" class="bg-[#DCE4F2] text-[#4A6EB0] text-sm md:text-base font-medium rounded-full py-2.5 px-5 appearance-none pr-8 relative bg-no-repeat bg-[right_1rem_center] bg-[length:1em_1em] whitespace-nowrap outline-none cursor-pointer">
+                        <option value="All">All Statuses</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Verified">Verified</option>
+                        <option value="Awaiting">Awaiting Payment</option>
+                        <option value="Active">Active / Ongoing</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Cancelled">Cancelled</option>
                     </select>
                 </div>
             </div>
 
             <div class="bg-white rounded-2xl card-shadow overflow-hidden border border-gray-100 p-2 md:p-4 w-full overflow-x-auto">
-                <table class="w-full min-w-[700px] text-left border-collapse">
+                <table class="w-full min-w-[700px] text-left border-collapse" id="bookingTable">
                     <thead>
                         <tr class="bg-white text-[10px] md:text-[11px] uppercase tracking-widest text-black font-bold border-b border-gray-100">
                             <th class="py-3 px-3 md:py-4 md:px-4">BOOKING CODE</th>
@@ -165,8 +171,13 @@
                             elseif($booking->status == 'History') { $uiStatus = 'Completed'; $color = 'bg-green-300 text-white'; }
                             elseif($booking->status == 'Pending Payment') { $uiStatus = 'Awaiting'; $color = 'bg-gray-300 text-white'; }
                             else { $uiStatus = 'Cancelled'; $color = 'bg-red-300 text-white'; }
+                            
+                            // Siapkan string pencarian gabungan
+                            $searchString = strtolower($booking->booking_code . ' ' . $booking->renter_name . ' ' . $booking->car->name);
                         @endphp
-                        <tr class="border-b border-gray-50 hover:bg-gray-50 transition">
+                        <tr class="booking-row border-b border-gray-50 hover:bg-gray-50 transition" 
+                            data-status="{{ $uiStatus }}" 
+                            data-search="{{ $searchString }}">
                             <td class="py-3 px-3 md:px-4">
                                 <p class="font-bold text-[#1C2C4A] whitespace-nowrap">{{ $booking->booking_code }}</p>
                                 <p class="text-[9px] md:text-[10px] text-[#8CA1C4] whitespace-nowrap">Rp {{ number_format($booking->total_price, 0, ',', '.') }}</p>
@@ -206,6 +217,10 @@
                         @endforeach
                     </tbody>
                 </table>
+                <div id="noResultMsg" class="hidden text-center py-8 text-gray-400 font-medium w-full">
+                    <i class="fa-solid fa-file-circle-xmark text-3xl mb-2 opacity-50"></i><br>
+                    Data tidak ditemukan
+                </div>
             </div>
         </main>
     </div>
@@ -527,8 +542,7 @@
             else if(uiStatus == 'Completed') badge.classList.add('bg-green-300');
             else badge.classList.add('bg-gray-400');
 
-            // 🟢 LOGIC MUNCULIN INSPECTION RETURN DETAIL 🟢
-            // Bakal ngecek: Kalau statusnya 'Completed' DAN ada isi `body_condition`-nya di database, tampilin div-nya.
+            // Logic untuk bagian Detail Return Inspection
             const retContainer = document.getElementById('mdl_return_details_container');
             if(uiStatus === 'Completed' && booking.body_condition) {
                 document.getElementById('mdl_ret_body').innerText = booking.body_condition;
@@ -574,7 +588,6 @@
             toggleModal('detailModal');
         }
 
-        // 🟢 BUKA MODAL FORM RETURN 🟢
         function openReturnModal(bookingId, code, carName, plate, carImg, renterName, renterPhone) {
             toggleModal('detailModal');
             
@@ -598,12 +611,47 @@
 
         function openPickupModal(booking, car) {
             document.getElementById('pickupForm').action = `/admin/bookings/${booking.id}/pickup`;
-            document.getElementById('pickup_car_img').src = `/${car.image_path}`;
-            document.getElementById('pickup_car_name').innerText = car.name;
-            document.getElementById('pickup_car_plate').innerText = car.license_plate;
-            document.getElementById('pickup_code_display').innerText = booking.booking_code;
+            // Pastikan ID html pickup modal sesuai kalo ada error nampilin gambar
             toggleModal('pickupModal');
         }
+
+        // 🟢 LOGIKA FILTER DAN SEARCH REAL-TIME 🟢
+        document.addEventListener("DOMContentLoaded", function() {
+            const searchInput = document.getElementById('searchInput');
+            const statusFilter = document.getElementById('statusFilter');
+            const rows = document.querySelectorAll('.booking-row');
+            const noResultMsg = document.getElementById('noResultMsg');
+
+            function filterTable() {
+                const query = searchInput.value.toLowerCase().trim();
+                const status = statusFilter.value;
+                let visibleCount = 0;
+
+                rows.forEach(row => {
+                    const rowSearch = row.getAttribute('data-search');
+                    const rowStatus = row.getAttribute('data-status');
+
+                    const matchSearch = rowSearch.includes(query);
+                    const matchStatus = (status === 'All') || (rowStatus === status);
+
+                    if (matchSearch && matchStatus) {
+                        row.style.display = '';
+                        visibleCount++;
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+
+                if (visibleCount === 0) {
+                    noResultMsg.classList.remove('hidden');
+                } else {
+                    noResultMsg.classList.add('hidden');
+                }
+            }
+
+            searchInput.addEventListener('input', filterTable);
+            statusFilter.addEventListener('change', filterTable);
+        });
     </script>
 </body>
 </html>

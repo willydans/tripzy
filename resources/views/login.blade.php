@@ -52,7 +52,28 @@
         .otp-input:focus { border-color: #4A6EB0; background: #fff; outline: none; box-shadow: 0 0 10px rgba(255, 255, 255, 0.3); }
     </style>
 </head>
-<body class="bg-split min-h-screen flex items-center justify-center p-4 md:p-0">
+<body class="bg-split min-h-screen flex items-center justify-center p-4 md:p-0 relative">
+
+    @if(session('success') || session('error') || $errors->any())
+    <div id="toastNotification" class="fixed top-10 left-1/2 transform -translate-x-1/2 z-[100] transition-all duration-500 ease-in-out w-11/12 md:w-auto">
+        <div class="{{ session('error') || $errors->any() ? 'bg-red-500/90 border-red-400' : 'bg-[#5C72A6]/90 border-[#4A6EB0]' }} backdrop-blur-md border px-6 md:px-10 py-4 md:py-5 rounded-2xl shadow-2xl flex flex-col md:flex-row items-center gap-3 md:gap-4 relative w-full md:min-w-[400px]">
+            <button onclick="closeToast()" class="absolute top-2 right-4 text-white/80 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white text-xl shadow-inner shrink-0">
+                <i class="fa-solid {{ session('error') || $errors->any() ? 'fa-triangle-exclamation' : 'fa-check' }}"></i>
+            </div>
+            <p class="text-sm md:text-base font-bold text-center md:text-left tracking-wide text-white pr-4 leading-snug">
+                {{ session('error') ?? session('success') ?? $errors->first() }}
+            </p>
+        </div>
+    </div>
+    <script>
+        setTimeout(() => closeToast(), 6000); // Hilang otomatis dlm 6 detik
+        function closeToast() {
+            const toast = document.getElementById('toastNotification');
+            if(toast) { toast.style.opacity = '0'; toast.style.transform = 'translate(-50%, -20px)'; setTimeout(() => toast.remove(), 500); }
+        }
+    </script>
+    @endif
 
     <div class="w-full h-full md:h-screen grid grid-cols-1 md:grid-cols-2 relative gap-8 md:gap-0 max-w-lg md:max-w-none py-8 md:py-0">
         
@@ -60,19 +81,7 @@
 
         <div class="flex items-center justify-center md:p-8 relative z-10 order-1">
             <div class="glass-card w-full max-w-md rounded-2xl p-6 md:p-10 flex flex-col relative z-10">
-                <h2 class="text-2xl md:text-3xl font-bold text-[#1C2C4A] text-center mb-6 drop-shadow-sm">Login here.</h2>
-                
-                @if(session('success'))
-                    <div class="bg-green-100 text-green-700 p-3 rounded-lg mb-4 text-xs md:text-sm text-center font-medium shadow-sm border border-green-200">
-                        {{ session('success') }}
-                    </div>
-                @endif
-
-                @if ($errors->any() || session('error'))
-                    <div class="bg-red-100 text-red-600 p-3 rounded-lg mb-4 text-xs md:text-sm text-center font-medium shadow-sm border border-red-200">
-                        {{ session('error') ?? $errors->first() }}
-                    </div>
-                @endif
+                <h2 class="text-2xl md:text-3xl font-bold text-[#1C2C4A] text-center mb-8 drop-shadow-sm">Login here.</h2>
 
                 <form action="{{ route('login') }}" method="POST" class="flex flex-col">
                     @csrf 

@@ -228,41 +228,41 @@
                 
                 <div>
                     <label class="block text-[10px] md:text-xs text-[#313A53] font-bold tracking-widest uppercase mb-1 ml-4">NAMA LENGKAP</label>
-                    <input type="text" name="name" value="{{ old('name', $user->name) }}" class="profile-input" readonly required>
+                    <input type="text" name="name" value="{{ $user->name }}" class="profile-input" readonly required>
                 </div>
                 <div>
                     <label class="block text-[10px] md:text-xs text-[#313A53] font-bold tracking-widest uppercase mb-1 ml-4">NOMOR TELEPON</label>
-                    <input type="text" name="nomor_hp" value="{{ old('nomor_hp', $user->nomor_hp) }}" class="profile-input" readonly>
+                    <input type="text" name="nomor_hp" value="{{ $user->nomor_hp }}" class="profile-input" readonly inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                 </div>
                 <div>
                     <label class="block text-[10px] md:text-xs text-[#313A53] font-bold tracking-widest uppercase mb-1 ml-4">KOTA</label>
-                    <input type="text" name="kota" value="{{ old('kota', $user->kota) }}" class="profile-input" readonly>
+                    <input type="text" name="kota" value="{{ $user->kota }}" class="profile-input" readonly>
                 </div>
                 <div>
                     <label class="block text-[10px] md:text-xs text-[#313A53] font-bold tracking-widest uppercase mb-1 ml-4">JENIS SIM</label>
-                    <input type="text" name="jenis_sim" value="{{ old('jenis_sim', $user->jenis_sim) }}" class="profile-input" readonly>
+                    <input type="text" name="jenis_sim" value="{{ $user->jenis_sim }}" class="profile-input" readonly>
                 </div>
 
                 <div class="md:col-start-2 md:row-start-1">
                     <label class="block text-[10px] md:text-xs text-[#313A53] font-bold tracking-widest uppercase mb-1 ml-4">EMAIL</label>
-                    <input type="email" name="email" value="{{ old('email', $user->email) }}" class="profile-input" readonly required>
+                    <input type="email" name="email" value="{{ $user->email }}" class="profile-input" readonly required>
                 </div>
                 <div class="md:col-start-2 md:row-start-2">
                     <label class="block text-[10px] md:text-xs text-[#313A53] font-bold tracking-widest uppercase mb-1 ml-4">ALAMAT</label>
-                    <input type="text" name="alamat" value="{{ old('alamat', $user->alamat) }}" class="profile-input" readonly>
+                    <input type="text" name="alamat" value="{{ $user->alamat }}" class="profile-input" readonly>
                 </div>
                 <div class="md:col-start-2 md:row-start-3">
                     <label class="block text-[10px] md:text-xs text-[#313A53] font-bold tracking-widest uppercase mb-1 ml-4">NOMOR SIM</label>
-                    <input type="text" name="nomor_sim" value="{{ old('nomor_sim', $user->nomor_sim) }}" class="profile-input" readonly>
+                    <input type="text" name="nomor_sim" value="{{ $user->nomor_sim }}" class="profile-input" readonly>
                 </div>
                 <div class="md:col-start-2 md:row-start-4">
                     <label class="block text-[10px] md:text-xs text-[#313A53] font-bold tracking-widest uppercase mb-1 ml-4">MASA BERLAKU SIM</label>
-                    <input type="date" name="masa_berlaku_sim" value="{{ old('masa_berlaku_sim', $user->masa_berlaku_sim ? $user->masa_berlaku_sim->format('Y-m-d') : '') }}" class="profile-input" readonly>
+                    <input type="date" name="masa_berlaku_sim" value="{{ $user->masa_berlaku_sim ? \Carbon\Carbon::parse($user->masa_berlaku_sim)->format('Y-m-d') : '' }}" class="profile-input" readonly>
                 </div>
 
                 <div class="md:col-start-3 md:row-start-1">
                     <label class="block text-[10px] md:text-xs text-[#313A53] font-bold tracking-widest uppercase mb-1 ml-4">TANGGAL LAHIR</label>
-                    <input type="date" name="tanggal_lahir" value="{{ old('tanggal_lahir', $user->tanggal_lahir ? $user->tanggal_lahir->format('Y-m-d') : '') }}" class="profile-input" readonly>
+                    <input type="date" name="tanggal_lahir" value="{{ $user->tanggal_lahir ? \Carbon\Carbon::parse($user->tanggal_lahir)->format('Y-m-d') : '' }}" class="profile-input" readonly>
                 </div>
 
                 <div class="col-span-1 md:col-span-3 hidden flex-col md:flex-row justify-end mt-4 md:mt-8" id="saveBtnContainer">
@@ -333,6 +333,9 @@
             const isEditing = body.classList.contains('edit-mode');
 
             if (isEditing) {
+                // Saat batal, kembalikan value form ke kondisi asal biar bener-bener batal
+                document.getElementById('profileForm').reset();
+
                 body.classList.remove('edit-mode');
                 btnEdit.classList.remove('hidden');
                 btnBatal.classList.add('hidden');
@@ -368,6 +371,13 @@
                 reader.readAsDataURL(event.target.files[0]);
             }
         }
+
+        // Kalau ada error validasi dari server pas buka halaman, otomatis trigger mode edit biar form bisa dikoreksi
+        @if ($errors->any())
+            document.addEventListener('DOMContentLoaded', function() {
+                toggleEdit();
+            });
+        @endif
     </script>
 </body>
 </html>

@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;       // 👈 Import DB Facade buat query otp_codes
 use Illuminate\Support\Facades\Mail;     // 👈 Import Mail Facade
-use App\Mail\SendOtpMail;                // 👈 Import Mailable Class lu
+use App\Mail\SendOtpMail;                // 👈 Import Mailable Class
 use Carbon\Carbon;                       // 👈 Import Carbon buat ngitung waktu expired
 
 class AuthController extends Controller
@@ -29,22 +29,26 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
+            
+            // 🟢 FIX: Ubah status jadi huruf kecil semua dan hapus spasi tersembunyi
+            $status = strtolower(trim($user->status));
 
             // 👇 CEK STATUS AKUN DI SINI 👇
-            if ($user->status === 'Pending') {
+            if ($status === 'pending') {
                 Auth::logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
                 
                 // Pesan formal untuk status Pending
-                return back()->with('error', 'Akun Anda sedang dalam proses verifikasi oleh Admin. Harap menunggu.');
-            } elseif ($user->status === 'Blacklist') {
+                return redirect()->route('login')->with('error', 'Akun Anda sedang dalam proses verifikasi oleh Admin. Harap menunggu.');
+                
+            } elseif ($status === 'blacklist') {
                 Auth::logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
                 
                 // Pesan formal untuk status Blacklist
-                return back()->with('error', 'Akun Anda telah diblokir. Anda tidak dapat mengakses sistem.');
+                return redirect()->route('login')->with('error', 'Akun Anda telah diblokir. Anda tidak dapat mengakses sistem.');
             }
 
             // Kalau lolos dan statusnya Active, lanjut bikin session
@@ -131,7 +135,7 @@ class AuthController extends Controller
             ]
         );
 
-        // Kirim email pake Mailtrap / SMTP
+        // Kirim email pake Mailtrap / SMTP Gmail
         Mail::to($request->email)->send(new SendOtpMail($otp));
 
         return response()->json(['success' => true, 'message' => 'OTP berhasil dikirim ke email.']);

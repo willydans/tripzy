@@ -62,7 +62,7 @@
                 
                 <div class="relative w-full max-w-[200px] md:max-w-xs lg:w-96 hidden sm:block">
                     <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-white"></i>
-                    <input type="text" placeholder="Search...." class="w-full glass-search text-white placeholder-white rounded-full py-2 md:py-2.5 pl-10 md:pl-12 pr-4 focus:outline-none focus:bg-white/30 transition shadow-inner text-sm md:text-base">
+                    <input type="text" placeholder="Search...." class="w-full glass-search text-white placeholder-white rounded-full py-2 md:py-2.5 pl-10 md:pl-12 pr-4 focus:outline-none focus:bg-white/30 transition shadow-inner text-sm md:text-base pointer-events-none opacity-50" readonly>
                 </div>
             </div>
             
@@ -94,7 +94,8 @@
                     <h3 class="text-[#4A6EB0] font-bold text-sm md:text-lg mb-1 md:mb-2">Total Revenue</h3>
                     <h1 class="text-3xl sm:text-4xl md:text-5xl font-bebas tracking-wider text-[#4A6EB0] break-words">RP {{ number_format($totalRevenue, 0, ',', '.') }}</h1>
                 </div>
-                <a href="{{ route('admin.transactions.export') }}" class="w-full lg:w-auto bg-[#5C72A6] hover:bg-[#4A6EB0] text-white px-6 py-3 rounded-full font-bold shadow-md transition flex justify-center items-center gap-2 cursor-pointer text-sm md:text-base">
+                
+                <a href="/admin/transactions/export" class="w-full lg:w-auto bg-[#5C72A6] hover:bg-[#4A6EB0] text-white px-6 py-3 rounded-full font-bold shadow-md transition flex justify-center items-center gap-2 cursor-pointer text-sm md:text-base">
                     <i class="fa-solid fa-download"></i> Export Report
                 </a>
             </div>
@@ -121,21 +122,21 @@
             <div class="flex flex-col md:flex-row gap-3 md:gap-4 mb-6">
                 <div class="relative flex-grow w-full lg:max-w-md">
                     <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-[#8CA1C4]"></i>
-                    <input type="text" id="searchInput" placeholder="Search...." class="w-full bg-[#DCE4F2] text-[#4A6EB0] placeholder-[#8CA1C4] rounded-full py-2.5 pl-12 pr-4 focus:outline-none transition text-sm">
+                    <input type="text" id="searchInput" placeholder="Search code, name, or car...." class="w-full bg-[#DCE4F2] text-[#4A6EB0] placeholder-[#8CA1C4] rounded-full py-2.5 pl-12 pr-4 focus:outline-none transition text-sm">
                 </div>
                 <div class="relative w-full md:w-auto">
-                    <select class="w-full md:w-48 bg-[#DCE4F2] text-[#4A6EB0] text-sm md:text-base font-medium rounded-full py-2.5 px-6 appearance-none pr-10 outline-none">
-                        <option>All Statuses</option>
-                        <option>Completed</option>
-                        <option>Pending</option>
-                        <option>Cancelled</option>
+                    <select id="statusFilter" class="w-full md:w-48 bg-[#DCE4F2] text-[#4A6EB0] text-sm md:text-base font-medium rounded-full py-2.5 px-6 appearance-none pr-10 outline-none cursor-pointer">
+                        <option value="All">All Statuses</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Cancelled">Cancelled</option>
                     </select>
                     <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 transform -translate-y-1/2 text-[#8CA1C4] pointer-events-none"></i>
                 </div>
             </div>
 
             <div class="bg-white rounded-2xl card-shadow overflow-hidden border border-gray-100 p-2 md:p-4 w-full overflow-x-auto">
-                <table class="w-full min-w-[700px] text-left border-collapse whitespace-nowrap">
+                <table class="w-full min-w-[700px] text-left border-collapse whitespace-nowrap" id="transactionTable">
                     <thead>
                         <tr class="bg-white text-[10px] md:text-[11px] uppercase tracking-widest text-black font-bold border-b border-gray-100">
                             <th class="py-3 px-3 md:py-4 md:px-4">ID</th>
@@ -150,7 +151,6 @@
                     <tbody class="text-xs md:text-sm">
                         @foreach($bookings as $booking)
                         @php
-                            // Mapping status buat UI
                             $uiStatus = ''; $color = '';
                             if(in_array($booking->status, ['History', 'Ongoing'])) { 
                                 $uiStatus = 'Completed'; 
@@ -162,8 +162,13 @@
                                 $uiStatus = 'Cancelled'; 
                                 $color = 'bg-red-300 text-white'; 
                             }
+                            
+                            // String pencarian
+                            $searchString = strtolower($booking->booking_code . ' ' . $booking->renter_name . ' ' . $booking->car->name);
                         @endphp
-                        <tr class="border-b border-gray-50 hover:bg-gray-50 transition">
+                        <tr class="transaction-row border-b border-gray-50 hover:bg-gray-50 transition"
+                            data-status="{{ $uiStatus }}"
+                            data-search="{{ $searchString }}">
                             <td class="py-3 px-3 md:px-4">
                                 <p class="font-bold text-[#1C2C4A]">{{ $booking->booking_code }}</p>
                                 <p class="text-[9px] md:text-[10px] text-[#4A6EB0]">Rp {{ number_format($booking->total_price, 0, ',', '.') }}</p>
@@ -198,6 +203,10 @@
                         @endforeach
                     </tbody>
                 </table>
+                <div id="noResultMsg" class="hidden text-center py-8 text-gray-400 font-medium w-full">
+                    <i class="fa-solid fa-receipt text-3xl mb-2 opacity-50"></i><br>
+                    Data transaksi tidak ditemukan
+                </div>
             </div>
 
         </main>
@@ -298,7 +307,6 @@
     </div>
 
     <script>
-        // Toggle Sidebar Mobile
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebarOverlay');
@@ -314,7 +322,6 @@
             }
         }
 
-        // Toggle Modal
         function toggleModal(modalID) {
             const modal = document.getElementById(modalID);
             if (modal.classList.contains('opacity-0')) {
@@ -332,7 +339,6 @@
 
         let currentBookingCode = 'INV';
 
-        // Buka Modal & Isi Data Dinamis
         function openInvoiceModal(booking, car, uiStatus) {
             currentBookingCode = booking.booking_code;
             
@@ -349,14 +355,12 @@
             document.getElementById('inv_duration').innerText = `${booking.duration} hari`;
             document.getElementById('inv_rate').innerText = formatRupiah(car.price_per_day);
             
-            // Set Status Color
             const statEl = document.getElementById('inv_status');
             statEl.innerText = uiStatus === 'Completed' ? 'Success' : uiStatus;
             if(uiStatus === 'Completed') { statEl.className = 'font-bold text-green-500'; }
             else if(uiStatus === 'Pending') { statEl.className = 'font-bold text-orange-500'; }
             else { statEl.className = 'font-bold text-red-500'; }
 
-            // Kalkulasi
             let rentalFee = car.price_per_day * booking.duration;
             let driverText = booking.with_driver ? ' (+ Supir)' : '';
             document.getElementById('inv_calc_text').innerText = `Rental Fee (${booking.duration} days × ${formatRupiah(car.price_per_day)})${driverText}`;
@@ -366,22 +370,55 @@
             toggleModal('invoiceModal');
         }
 
-        // Fungsi Download PDF menggunakan html2pdf.js
         function downloadPDF() {
             const element = document.getElementById('invoiceContent');
-            
-            // Konfigurasi PDF
             const opt = {
-                margin:       [0.5, 0.5, 0.5, 0.5], // inci
+                margin:       [0.5, 0.5, 0.5, 0.5],
                 filename:     `${currentBookingCode}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2, useCORS: true }, 
                 jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
             };
-
-            // Jalankan html2pdf
             html2pdf().set(opt).from(element).save();
         }
+
+        // 🟢 REAL-TIME FILTER DAN SEARCH JAVASCRIPT 🟢
+        document.addEventListener("DOMContentLoaded", function() {
+            const searchInput = document.getElementById('searchInput');
+            const statusFilter = document.getElementById('statusFilter');
+            const rows = document.querySelectorAll('.transaction-row');
+            const noResultMsg = document.getElementById('noResultMsg');
+
+            function filterTable() {
+                const query = searchInput.value.toLowerCase().trim();
+                const status = statusFilter.value;
+                let visibleCount = 0;
+
+                rows.forEach(row => {
+                    const rowSearch = row.getAttribute('data-search');
+                    const rowStatus = row.getAttribute('data-status');
+
+                    const matchSearch = rowSearch.includes(query);
+                    const matchStatus = (status === 'All') || (rowStatus === status);
+
+                    if (matchSearch && matchStatus) {
+                        row.style.display = '';
+                        visibleCount++;
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+
+                if (visibleCount === 0) {
+                    noResultMsg.classList.remove('hidden');
+                } else {
+                    noResultMsg.classList.add('hidden');
+                }
+            }
+
+            searchInput.addEventListener('input', filterTable);
+            statusFilter.addEventListener('change', filterTable);
+        });
     </script>
 </body>
 </html>

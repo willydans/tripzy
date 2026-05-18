@@ -12,7 +12,6 @@
     <style>
         body { font-family: 'Poppins', sans-serif; background-color: #F4F7FC; overflow-x: hidden; }
         
-        /* Gradient Hero lebih pendek dari Home */
         .hero-gradient {
             background: linear-gradient(180deg, #3A62A6 0%, #7A9FE0 50%, #F4F7FC 100%);
             position: relative;
@@ -44,7 +43,6 @@
             .glass-nav { width: 80%; top: 20px; }
         }
 
-        /* Filter Active State */
         .filter-btn.active {
             background-color: white;
             color: #4A6EB0;
@@ -54,7 +52,6 @@
             box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
         }
 
-        /* Sembunyikan scrollbar untuk navigasi mobile */
         .hide-scroll::-webkit-scrollbar { display: none; }
         .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
@@ -102,11 +99,14 @@
             <div class="flex flex-nowrap md:flex-wrap justify-start md:justify-center items-center gap-2 text-xs md:text-sm font-medium text-[#7C98C4] min-w-max pb-1 md:pb-0" id="filterContainer">
                 <button class="filter-btn active hover:text-[#4A6EB0] transition px-3 py-1.5 md:px-4 md:py-2 rounded-full whitespace-nowrap" data-filter="all">All</button>
                 @php
-                    // Ambil daftar kategori unik dari mobil yang ada
                     $categories = $cars->pluck('category')->unique();
                 @endphp
                 @foreach($categories as $category)
-                    <button class="filter-btn hover:text-[#4A6EB0] transition px-3 py-1.5 md:px-4 md:py-2 rounded-full whitespace-nowrap" data-filter="{{ strtolower($category) }}">{{ $category }}</button>
+                    @php
+                        // Memastikan format filter bener-bener bersih pakai Str::slug
+                        $filterSlug = \Illuminate\Support\Str::slug($category);
+                    @endphp
+                    <button class="filter-btn hover:text-[#4A6EB0] transition px-3 py-1.5 md:px-4 md:py-2 rounded-full whitespace-nowrap" data-filter="{{ $filterSlug }}">{{ trim($category) }}</button>
                 @endforeach
             </div>
         </div>
@@ -117,12 +117,17 @@
             
             @if(isset($cars) && $cars->count() > 0)
                 @foreach($cars as $car)
+                @php
+                    // Pastikan kategori pada mobil formatnya persis sama dengan Str::slug
+                    $carCategorySlug = \Illuminate\Support\Str::slug($car->category);
+                    $carNameSafe = trim(strtolower($car->name));
+                @endphp
                 <div class="car-card bg-gradient-to-b from-[#8C9FBB] to-[#A9BBD6] rounded-2xl md:rounded-3xl p-5 md:p-6 shadow-md border border-white/20 flex flex-col justify-between transition transform hover:-translate-y-1 hover:shadow-xl" 
-                     data-category="{{ strtolower($car->category) }}" 
-                     data-name="{{ strtolower($car->name) }}">
+                     data-category="{{ $carCategorySlug }}" 
+                     data-name="{{ $carNameSafe }}">
                     
                     <div>
-                        <span class="absolute top-4 md:top-5 left-4 md:left-5 bg-white/40 text-[#1C2C4A] px-2 py-1 rounded-md text-[9px] md:text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm z-20">{{ $car->category }}</span>
+                        <span class="absolute top-4 md:top-5 left-4 md:left-5 bg-white/40 text-[#1C2C4A] px-2 py-1 rounded-md text-[9px] md:text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm z-20">{{ trim($car->category) }}</span>
                         
                         <img src="{{ asset($car->image_path) }}" alt="{{ $car->name }}" class="w-full h-32 md:h-40 object-contain drop-shadow-xl mb-2 md:mb-4 z-10 relative">
                         <div class="flex justify-between items-end mb-3 md:mb-4">
@@ -207,6 +212,7 @@
                     const carCategory = card.getAttribute('data-category');
                     const carName = card.getAttribute('data-name');
                     
+                    // KOMPARASI MUTLAK === (mpv TIDAK AKAN SAMA DENGAN luxury-mpv)
                     const matchCategory = (activeCategory === 'all') || (carCategory === activeCategory);
                     const matchSearch = carName.includes(searchQuery);
 
@@ -234,13 +240,13 @@
                     this.classList.add('active', 'bg-white', 'text-[#4A6EB0]', 'font-semibold', 'shadow-sm');
                     
                     activeCategory = this.getAttribute('data-filter');
-                    filterCars();
+                    filterCars(); // Panggil fungsi filter ulang
                 });
             });
 
             if(searchInput) {
                 searchInput.addEventListener('input', function(e) {
-                    searchQuery = e.target.value.toLowerCase();
+                    searchQuery = e.target.value.toLowerCase().trim();
                     filterCars();
                 });
             }

@@ -63,7 +63,6 @@
 </head>
 <body class="flex h-screen overflow-hidden text-[#1C2C4A]">
 
-    <!-- TOAST NOTIFICATION -->
     @if(session('success'))
     <div id="toastNotification" class="fixed inset-0 flex items-center justify-center z-[100] bg-black/40 backdrop-blur-sm transition-opacity duration-300 px-4">
         <div class="bg-[#5C72A6] rounded-2xl p-6 md:p-8 flex flex-col items-center shadow-2xl relative w-full max-w-sm transform scale-100 transition-transform">
@@ -83,10 +82,8 @@
     </script>
     @endif
 
-    <!-- OVERLAY SIDEBAR MOBILE -->
     <div id="sidebarOverlay" class="fixed inset-0 bg-black/50 z-30 hidden md:hidden transition-opacity opacity-0" onclick="toggleSidebar()"></div>
 
-    <!-- SIDEBAR -->
     <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 sidebar-bg text-white flex flex-col h-full shadow-2xl md:shadow-lg z-40 transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300 shrink-0">
         <div class="p-6 flex justify-between items-center">
             <div>
@@ -104,10 +101,8 @@
         </nav>
     </aside>
 
-    <!-- MAIN CONTENT WRAPPER -->
     <div class="flex-grow flex flex-col h-full overflow-y-auto relative bg-[#F4F7FC]">
         
-        <!-- HEADER TOPBAR -->
         <header class="topbar-bg px-4 md:px-8 py-4 md:py-5 flex justify-between items-center sticky top-0 z-20 shadow-sm md:shadow-none">
             <div class="flex items-center gap-3 md:gap-0">
                 <button onclick="toggleSidebar()" class="md:hidden text-[#4A6EB0] text-2xl focus:outline-none">
@@ -115,7 +110,7 @@
                 </button>
                 <div class="relative w-full max-w-[200px] md:max-w-xs lg:w-96 hidden sm:block">
                     <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-[#4A6EB0] md:text-white"></i>
-                    <input type="text" placeholder="Search...." class="w-full glass-search text-[#4A6EB0] md:text-white placeholder-[#8CA1C4] md:placeholder-white rounded-full py-2 md:py-2.5 pl-10 md:pl-12 pr-4 focus:outline-none focus:bg-white/30 transition shadow-inner text-sm md:text-base">
+                    <input type="text" placeholder="Search...." class="w-full glass-search text-[#4A6EB0] md:text-white placeholder-[#8CA1C4] md:placeholder-white rounded-full py-2 md:py-2.5 pl-10 md:pl-12 pr-4 focus:outline-none focus:bg-white/30 transition shadow-inner text-sm md:text-base pointer-events-none opacity-50" readonly>
                 </div>
             </div>
             
@@ -138,7 +133,6 @@
             </div>
         </header>
 
-        <!-- MAIN CONTENT -->
         <main class="p-4 md:p-8 pb-24">
             
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-8">
@@ -151,25 +145,35 @@
                 </button>
             </div>
 
-            <!-- SEARCH & FILTER -->
             <div class="flex flex-col lg:flex-row gap-3 md:gap-4 mb-6">
                 <div class="relative flex-grow w-full lg:max-w-md">
                     <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-[#8CA1C4]"></i>
-                    <input type="text" placeholder="Search...." class="w-full bg-[#DCE4F2] text-[#4A6EB0] placeholder-[#8CA1C4] rounded-full py-2.5 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-[#8CA1C4] transition text-sm">
+                    <input type="text" id="searchInput" placeholder="Search car name or plate...." class="w-full bg-[#DCE4F2] text-[#4A6EB0] placeholder-[#8CA1C4] rounded-full py-2.5 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-[#8CA1C4] transition text-sm">
                 </div>
                 <div class="flex gap-2 md:gap-4 overflow-x-auto hide-scroll pb-1">
-                    <select class="bg-[#DCE4F2] text-[#4A6EB0] text-sm md:text-base font-medium rounded-full py-2.5 px-5 md:px-6 appearance-none pr-8 md:pr-10 relative bg-no-repeat bg-[right_1rem_center] bg-[length:1em_1em] whitespace-nowrap outline-none">
-                        <option>All Statuses</option>
+                    <select id="statusFilter" class="cursor-pointer bg-[#DCE4F2] text-[#4A6EB0] text-sm md:text-base font-medium rounded-full py-2.5 px-5 md:px-6 appearance-none pr-8 md:pr-10 relative bg-no-repeat bg-[right_1rem_center] bg-[length:1em_1em] whitespace-nowrap outline-none">
+                        <option value="All">All Statuses</option>
+                        <option value="Tersedia">Tersedia</option>
+                        <option value="Disewa">Disewa</option>
+                        <option value="Maintenance">Maintenance / Diservis</option>
                     </select>
-                    <select class="bg-[#DCE4F2] text-[#4A6EB0] text-sm md:text-base font-medium rounded-full py-2.5 px-5 md:px-6 appearance-none pr-8 md:pr-10 relative bg-no-repeat bg-[right_1rem_center] bg-[length:1em_1em] whitespace-nowrap outline-none">
-                        <option>All Categories</option>
+                    <select id="categoryFilter" class="cursor-pointer bg-[#DCE4F2] text-[#4A6EB0] text-sm md:text-base font-medium rounded-full py-2.5 px-5 md:px-6 appearance-none pr-8 md:pr-10 relative bg-no-repeat bg-[right_1rem_center] bg-[length:1em_1em] whitespace-nowrap outline-none">
+                        <option value="All">All Categories</option>
+                        @php
+                            $categories = $cars->pluck('category')->unique();
+                        @endphp
+                        @foreach($categories as $category)
+                            @php
+                                $filterSlug = \Illuminate\Support\Str::slug($category);
+                            @endphp
+                            <option value="{{ $filterSlug }}">{{ trim($category) }}</option>
+                        @endforeach
                     </select>
                 </div>
             </div>
 
-            <!-- TABLE WRAPPER -->
             <div class="bg-white rounded-2xl card-shadow overflow-hidden border border-gray-100 w-full overflow-x-auto">
-                <table class="w-full min-w-[800px] text-left border-collapse">
+                <table class="w-full min-w-[800px] text-left border-collapse" id="catalogTable">
                     <thead>
                         <tr class="bg-white text-[10px] uppercase tracking-widest text-black font-bold border-b border-gray-100">
                             <th class="py-4 px-6">CAR</th>
@@ -183,7 +187,19 @@
                     </thead>
                     <tbody class="text-sm">
                         @foreach($cars as $car)
-                        <tr class="border-b border-gray-50 hover:bg-gray-50 transition">
+                        @php
+                            // Data string untuk Javascript
+                            $searchString = strtolower($car->name . ' ' . $car->license_plate);
+                            $carCategorySlug = \Illuminate\Support\Str::slug($car->category);
+                            
+                            $uiStatus = $car->status;
+                            if($car->status == 'Maintenance' || $car->status == 'Diservis') $uiStatus = 'Maintenance';
+                        @endphp
+                        <tr class="car-row border-b border-gray-50 hover:bg-gray-50 transition"
+                            data-search="{{ $searchString }}"
+                            data-status="{{ $uiStatus }}"
+                            data-category="{{ $carCategorySlug }}">
+                            
                             <td class="py-3 px-6 flex items-center gap-4">
                                 <img src="{{ asset($car->image_path) }}" alt="{{ $car->name }}" class="w-16 h-10 object-contain shrink-0">
                                 <div>
@@ -194,7 +210,6 @@
                             <td class="py-3 px-6 text-[#4A6EB0] font-medium whitespace-nowrap">{{ $car->license_plate }}</td>
                             <td class="py-3 px-6 text-[#4A6EB0] whitespace-nowrap">{{ $car->category }}</td>
                             
-                            <!-- DATA QTY -->
                             <td class="py-3 px-6 text-center">
                                 <span class="font-bold text-[#1C2C4A] bg-[#EBF1FA] px-3 py-1 rounded-full text-xs border border-[#B2C5E5]">
                                     {{ $car->stock ?? 1 }} Unit
@@ -225,11 +240,14 @@
                         @endforeach
                     </tbody>
                 </table>
+                <div id="noResultMsg" class="hidden text-center py-8 text-gray-400 font-medium w-full">
+                    <i class="fa-solid fa-car-side text-3xl mb-2 opacity-50"></i><br>
+                    Data mobil tidak ditemukan
+                </div>
             </div>
         </main>
     </div>
 
-    <!-- MODAL ADD CAR Sesuai Desain UI -->
     <div id="addCarModal" class="fixed inset-0 z-[60] flex items-center justify-center opacity-0 pointer-events-none modal px-4 py-6">
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="toggleModal('addCarModal')"></div>
         <div class="bg-white rounded-3xl w-full max-w-3xl max-h-[95vh] overflow-y-auto relative shadow-2xl p-6 md:p-10 z-10 hide-scroll border border-gray-100">
@@ -290,7 +308,7 @@
 
                     <div>
                         <label class="form-label">Color <span class="text-red-500">*</span></label>
-                        <input type="text" name="color" placeholder="Example: Toyota Rush" class="form-input" required>
+                        <input type="text" name="color" placeholder="Example: Red" class="form-input" required>
                     </div>
                     <div>
                         <label class="form-label">Fuel</label>
@@ -315,7 +333,6 @@
                         <input type="number" name="seats" placeholder="Example: 6" class="form-input" required>
                     </div>
 
-                    <!-- Ganti Field Duplicate Transmission (Date) di desain lu jadi gabungan Stock Qty & Tgl Servis -->
                     <div>
                         <label class="form-label">Stock / Qty <span class="text-red-500">*</span></label>
                         <input type="number" name="stock" placeholder="Example: 5" value="1" min="1" class="form-input" required>
@@ -348,7 +365,6 @@
         </div>
     </div>
 
-    <!-- MODAL EDIT CAR Sesuai Desain UI -->
     <div id="editCarModal" class="fixed inset-0 z-[60] flex items-center justify-center opacity-0 pointer-events-none modal px-4 py-6">
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="toggleModal('editCarModal')"></div>
         <div class="bg-white rounded-3xl w-full max-w-3xl max-h-[95vh] overflow-y-auto relative shadow-2xl p-6 md:p-10 z-10 hide-scroll border border-gray-100">
@@ -356,7 +372,7 @@
             <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 bg-[#5C72A6] rounded-full flex items-center justify-center text-white shrink-0 shadow-md">
-                        <i class="fa-solid fa-plus text-xl"></i> <!-- Icon plus mengikuti mock up lu -->
+                        <i class="fa-solid fa-plus text-xl"></i>
                     </div>
                     <div>
                         <h2 class="text-xl md:text-2xl font-bold text-[#5C72A6]">Edit Car</h2>
@@ -370,7 +386,6 @@
                 @csrf
                 @method('PUT')
                 
-                <!-- Edit Image Preview Area -->
                 <div class="flex flex-col justify-center items-center mb-10 relative">
                     <div class="border border-[#B2C5E5] rounded-2xl p-4 w-full sm:w-[400px] h-48 flex items-center justify-center bg-white mb-5 shadow-sm relative overflow-hidden">
                         <img id="edit_image_preview" src="" class="max-w-full max-h-full object-contain drop-shadow-md z-10">
@@ -464,7 +479,6 @@
         </div>
     </div>
 
-    <!-- MODAL DELETE CAR -->
     <div id="deleteCarModal" class="fixed inset-0 z-[60] flex items-center justify-center opacity-0 pointer-events-none modal px-4">
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="toggleModal('deleteCarModal')"></div>
         <div class="bg-white rounded-2xl w-full max-w-sm md:max-w-md relative shadow-2xl p-6 md:p-8 z-10 text-center">
@@ -484,7 +498,6 @@
     </div>
 
     <script>
-        // Logika Toggle Sidebar Mobile
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebarOverlay');
@@ -500,7 +513,6 @@
             }
         }
 
-        // Logika Toggle Modal Responsive
         function toggleModal(modalID) {
             const modal = document.getElementById(modalID);
             
@@ -520,7 +532,6 @@
             }
         }
 
-        // Preview Image Form Tambah
         function previewImage(event, previewId, textId) {
             const input = event.target;
             const preview = document.getElementById(previewId);
@@ -541,7 +552,6 @@
             }
         }
 
-        // Preview Image Form Edit
         function previewEditImage(event) {
             const input = event.target;
             const preview = document.getElementById('edit_image_preview');
@@ -555,7 +565,6 @@
             }
         }
 
-        // Setup Data Modal Edit
         function openEditModal(car) {
             document.getElementById('editCarForm').action = `/admin/catalog/${car.id}`;
             document.getElementById('edit_name').value = car.name;
@@ -569,23 +578,65 @@
             document.getElementById('edit_fuel').value = car.fuel_type;
             document.getElementById('edit_transmission').value = car.transmission;
             document.getElementById('edit_seats').value = car.seats;
-            // Handle service date jika ada
+            
             if(car.service_date) {
                 document.getElementById('edit_service_date').value = car.service_date.split('T')[0];
             }
             
             document.getElementById('edit_image_preview').src = `/${car.image_path}`;
-            document.getElementById('edit-image-input').value = ""; // reset file input
+            document.getElementById('edit-image-input').value = ""; 
             
             toggleModal('editCarModal');
         }
 
-        // Setup Data Modal Delete
         function openDeleteModal(carId, carName) {
             document.getElementById('deleteCarForm').action = `/admin/catalog/${carId}`;
             document.getElementById('delete_car_name').innerText = carName;
             toggleModal('deleteCarModal');
         }
+
+        // 🟢 LOGIKA FILTER DAN SEARCH REAL-TIME 🟢
+        document.addEventListener("DOMContentLoaded", function() {
+            const searchInput = document.getElementById('searchInput');
+            const statusFilter = document.getElementById('statusFilter');
+            const categoryFilter = document.getElementById('categoryFilter');
+            const rows = document.querySelectorAll('.car-row');
+            const noResultMsg = document.getElementById('noResultMsg');
+
+            function filterTable() {
+                const query = searchInput.value.toLowerCase().trim();
+                const status = statusFilter.value;
+                const category = categoryFilter.value;
+                let visibleCount = 0;
+
+                rows.forEach(row => {
+                    const rowSearch = row.getAttribute('data-search');
+                    const rowStatus = row.getAttribute('data-status');
+                    const rowCategory = row.getAttribute('data-category');
+
+                    const matchSearch = rowSearch.includes(query);
+                    const matchStatus = (status === 'All') || (rowStatus === status);
+                    const matchCategory = (category === 'All') || (rowCategory === category);
+
+                    if (matchSearch && matchStatus && matchCategory) {
+                        row.style.display = '';
+                        visibleCount++;
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+
+                if (visibleCount === 0) {
+                    noResultMsg.classList.remove('hidden');
+                } else {
+                    noResultMsg.classList.add('hidden');
+                }
+            }
+
+            searchInput.addEventListener('input', filterTable);
+            statusFilter.addEventListener('change', filterTable);
+            categoryFilter.addEventListener('change', filterTable);
+        });
     </script>
 </body>
 </html>

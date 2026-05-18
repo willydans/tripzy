@@ -135,8 +135,12 @@ Route::middleware(['auth', \App\Http\Middleware\IsAdmin::class])->group(function
     Route::get('/admin/transactions', [AdminTransactionController::class, 'index'])->name('admin.transactions.index');
     Route::get('/admin/transactions/export', [AdminTransactionController::class, 'export'])->name('admin.transactions.export');
 
-    // ROUTE BARU BUAT USER MANAGEMENT
+    // ROUTE BARU BUAT USER MANAGEMENT (CRUD & BLACKLIST LENGKAP)
     Route::get('/admin/users', [AdminUserController::class, 'index'])->name('admin.users.index');
+    Route::post('/admin/users', [AdminUserController::class, 'store'])->name('admin.users.store'); // 👈 Rute Tambah User
+    Route::put('/admin/users/{id}', [AdminUserController::class, 'update'])->name('admin.users.update'); // 👈 Rute Edit User
+    Route::delete('/admin/users/{id}', [AdminUserController::class, 'destroy'])->name('admin.users.destroy'); // 👈 Rute Hapus User
     Route::post('/admin/users/{id}/verify', [AdminUserController::class, 'verify'])->name('admin.users.verify');
     Route::post('/admin/users/{id}/blacklist', [AdminUserController::class, 'blacklist'])->name('admin.users.blacklist');
+    Route::post('/admin/users/{id}/unblacklist', [AdminUserController::class, 'unblacklist'])->name('admin.users.unblacklist'); // 👈 Rute Lepas Blokir
 });
