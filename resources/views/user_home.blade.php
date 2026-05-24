@@ -381,5 +381,14 @@
             }
         });
     </script>
+    <script>
+        window.addEventListener('pageshow', function (event) {
+            // Jika halaman dimuat dari cache memori browser (tombol back)
+            if (event.persisted || (typeof window.performance != "undefined" && window.performance.navigation.type === 2)) {
+                // Paksa refresh halaman agar nembak ke server (Auth/Middleware) lagi
+                window.location.reload();
+            }
+        });
+    </script>
 </body>
 </html>

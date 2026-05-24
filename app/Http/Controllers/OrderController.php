@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use Midtrans\Config;
 use Midtrans\Snap;
+use App\Services\FonnteService; // 🟢 FIX: Import Service Fonnte untuk notifikasi WA
 
 class OrderController extends Controller
 {
@@ -99,6 +100,38 @@ class OrderController extends Controller
                 'doc_selfie' => $selfiePath,
             ]);
 
+            // 🟢 INTEGRASI NOTIFIKASI WA SAAT BERHASIL CHECKOUT (FORMAT INVOICE FULL) 🟢
+            $hargaPerHari = 'Rp ' . number_format($car->price_per_day, 0, ',', '.');
+            $totalRp = 'Rp ' . number_format($booking->total_price, 0, ',', '.');
+            $tglMulai = $startDate->format('d M Y');
+            $tglSelesai = $endDate->format('d M Y');
+            $linkOrders = route('user.orders'); 
+
+            $waMessage = "🧾 *INVOICE PEMESANAN - TRIPZY* 🧾\n\n"
+                       . "Halo *{$booking->renter_name}*,\n"
+                       . "Terima kasih! Pesanan Anda telah kami terima. Berikut rinciannya:\n\n"
+                       . "===========================\n"
+                       . "🔖 *KODE : {$booking->booking_code}*\n"
+                       . "===========================\n"
+                       . "🚗 *DETAIL KENDARAAN*\n"
+                       . "Mobil : {$car->name}\n"
+                       . "Nopol : {$car->license_plate}\n\n"
+                       . "📅 *DETAIL WAKTU SEWA*\n"
+                       . "Tanggal : {$tglMulai} s/d {$tglSelesai}\n"
+                       . "Durasi  : {$request->duration} Hari\n"
+                       . "Pickup  : {$request->pickup_time} WIB\n\n"
+                       . "💰 *RINCIAN BIAYA*\n"
+                       . "Sewa  : {$hargaPerHari} x {$request->duration} Hari\n"
+                       . "-------------------------------------------------\n"
+                       . "TOTAL TAGIHAN : *{$totalRp}*\n"
+                       . "STATUS        : ⏳ *PENDING PAYMENT*\n"
+                       . "===========================\n\n"
+                       . "Mohon segera selesaikan pembayaran Anda via QRIS di *Dashboard Tripzy* agar pesanan tidak dibatalkan otomatis oleh sistem.\n\n"
+                       . "Lakukan pembayaran di sini:\n"
+                       . $linkOrders;
+            
+            FonnteService::sendWA($booking->renter_phone, $waMessage);
+
             return redirect()->route('user.payment', $booking->id)->with('success', 'Booking berhasil dibuat! Silakan selesaikan pembayaran Anda.');
 
         } catch (\Exception $e) {
@@ -185,6 +218,15 @@ class OrderController extends Controller
             $booking->update([
                 'status' => 'Cancelled'
             ]);
+
+            // 🟢 INTEGRASI NOTIFIKASI WA SAAT USER CANCEL PESANAN 🟢
+            $waMessage = "🚫 *PEMBATALAN PESANAN - TRIPZY* 🚫\n\n"
+                       . "Halo *{$booking->renter_name}*,\n"
+                       . "Pesanan Anda dengan kode *{$booking->booking_code}* telah *DIBATALKAN* sesuai permintaan Anda.\n\n"
+                       . "Jika Anda telah melakukan pembayaran, proses pengembalian dana (refund) akan diproses sesuai kebijakan kami.\n\n"
+                       . "Sampai jumpa di perjalanan berikutnya bersama Tripzy! 🚗✨";
+            
+            FonnteService::sendWA($booking->renter_phone, $waMessage);
             
             return back()->with('success', 'Booking berhasil dibatalkan.');
         }

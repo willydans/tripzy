@@ -66,7 +66,13 @@
             box-shadow: 0 15px 30px rgba(0,0,0,0.4);
         }
 
-        /* Sembunyikan scrollbar untuk navigasi mobile */
+        /* Animasi khusus AI Search Bar */
+        .ai-glow { animation: pulseGlow 3s infinite alternate; }
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 10px rgba(59, 130, 246, 0.2); border-color: rgba(92, 114, 166, 0.5); }
+            100% { box-shadow: 0 0 25px rgba(59, 130, 246, 0.5); border-color: rgba(122, 159, 224, 0.8); }
+        }
+
         .hide-scroll::-webkit-scrollbar { display: none; }
         .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
@@ -230,7 +236,7 @@
                 
                 <div class="w-full lg:w-auto overflow-x-auto hide-scroll rounded-full">
                     <div class="flex flex-nowrap lg:flex-wrap justify-start lg:justify-center items-center gap-2 text-xs md:text-sm font-medium text-[#8CA1C4] bg-white/5 border border-white/10 rounded-full px-2 py-1.5 backdrop-blur-md min-w-max" id="filterContainer">
-                        <button class="filter-btn bg-white/10 text-white px-4 md:px-5 py-1.5 rounded-full shadow-sm font-semibold transition" data-filter="all">All</button>
+                        <button class="filter-btn bg-white/10 text-white px-4 md:px-5 py-1.5 rounded-full shadow-sm font-semibold transition" data-filter="all" onclick="resetAIFilter()">All</button>
                         @php
                             // Ambil daftar kategori dinamis dari database biar anti bocor
                             $categories = $cars->pluck('category')->unique();
@@ -239,71 +245,100 @@
                             @php
                                 $filterSlug = \Illuminate\Support\Str::slug($category);
                             @endphp
-                            <button class="filter-btn px-3 md:px-4 py-1.5 hover:text-white transition rounded-full whitespace-nowrap" data-filter="{{ $filterSlug }}">{{ trim($category) }}</button>
+                            <button class="filter-btn px-3 md:px-4 py-1.5 hover:text-white transition rounded-full whitespace-nowrap" data-filter="{{ $filterSlug }}" onclick="resetAIFilter()">{{ trim($category) }}</button>
                         @endforeach
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="max-w-7xl mx-auto px-4 pb-24 mt-6 md:mt-10 relative z-10">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6" id="catalogGrid">
-                
-                @foreach($cars as $car)
-                    @php
-                        // Format slug biar cocok mutlak sama filter
-                        $carCategorySlug = \Illuminate\Support\Str::slug($car->category);
-                        $carNameSafe = trim(strtolower($car->name));
-                    @endphp
-                    <div class="car-card bg-gradient-to-b from-[#6D819C] to-[#4C5B79] rounded-3xl p-5 md:p-6 shadow-xl border border-white/5 flex flex-col justify-between relative overflow-hidden" 
-                         data-category="{{ $carCategorySlug }}" 
-                         data-name="{{ $carNameSafe }}">
-                        
-                        @if($car->stock <= 0)
-                            <div class="absolute inset-0 bg-[#171B2D]/70 backdrop-blur-[2px] z-20 flex items-center justify-center pointer-events-none">
-                                <span class="bg-red-500 text-white px-5 py-2 rounded-full font-bold text-sm uppercase tracking-wider transform -rotate-12 border-2 border-white/20 shadow-2xl">
-                                    Habis Disewa
-                                </span>
-                            </div>
-                        @endif
-
-                        <div class="relative z-10">
-                            <img src="{{ asset($car->image_path) }}" alt="{{ $car->name }}" class="w-full h-32 md:h-40 object-contain drop-shadow-2xl mb-4">
-                            <div class="flex justify-between items-end mb-4">
-                                <div class="w-2/3 pr-2">
-                                    <h3 class="text-[10px] md:text-xs font-bold text-gray-200 uppercase mb-1 tracking-wider truncate">{{ $car->name }}</h3>
-                                    <div class="text-xl md:text-2xl font-extrabold text-white">
-                                        Rp {{ number_format($car->price_per_day, 0, ',', '.') }} 
-                                        <span class="text-[10px] font-normal text-gray-300">/day</span>
-                                    </div>
-                                    <p class="text-[9px] text-gray-300 mt-1 uppercase tracking-wide leading-relaxed">
-                                        Seats for {{ $car->seats }} &bull; {{ $car->transmission }} &bull; {{ $car->fuel_type }}
-                                    </p>
-                                </div>
-                                <div class="w-1/3 flex justify-end">
-                                    <img src="{{ asset($car->image_path) }}" alt="{{ $car->name }}" class="w-12 md:w-16 drop-shadow-lg opacity-80 object-contain">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="relative z-30">
-                            @if($car->stock > 0)
-                                <a href="{{ route('user.car.detail', $car->slug) }}" class="block w-full py-2 md:py-2.5 rounded-full bg-gradient-to-r from-white/30 to-white/10 border border-white/30 text-white text-center text-sm md:text-base font-bold shadow-md hover:bg-white/40 transition backdrop-blur-md mt-2">
-                                    Book Now
-                                </a>
-                            @else
-                                <button disabled class="block w-full py-2 md:py-2.5 rounded-full bg-white/10 border border-white/10 text-white/50 text-center text-sm md:text-base font-bold cursor-not-allowed mt-2">
-                                    Stock Kosong
-                                </button>
-                            @endif
-                        </div>
+        <div class="max-w-7xl mx-auto px-4 pb-24 mt-6 relative z-10">
+            
+            <div class="bg-gradient-to-r from-[#2B3553] to-[#1C2237] p-5 md:p-6 rounded-2xl border border-[#5C72A6] shadow-xl mb-10 relative overflow-hidden ai-glow">
+                <div class="absolute -top-10 -right-10 w-32 h-32 bg-blue-500 rounded-full blur-3xl opacity-20 pointer-events-none"></div>
+                <div class="relative z-10">
+                    <label class="block text-white font-bold text-sm md:text-base mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles text-yellow-400"></i> AI Trip Assistant
+                    </label>
+                    <p class="text-xs md:text-sm text-gray-300 mb-4">Bingung pilih mobil? Ceritain aja rencana perjalananmu (misal: "Liburan ke pantai 6 orang bawa banyak barang").</p>
+                    
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <input type="text" id="ai-query" placeholder="Ketik rencana liburanmu di sini..." class="w-full bg-[#171B2D]/50 border border-white/10 text-white placeholder-gray-500 rounded-xl px-4 py-3 focus:outline-none focus:border-[#7A9FE0] transition text-sm">
+                        <button onclick="askAI()" id="btn-ai" class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold px-6 py-3 rounded-xl transition shadow-lg shrink-0 flex items-center justify-center min-w-[120px]">
+                            Tanya AI
+                        </button>
                     </div>
-                @endforeach
-
+                </div>
             </div>
 
-            <div id="emptyState" class="text-center py-10 {{ $cars->count() > 0 ? 'hidden' : '' }}">
-                <p class="text-gray-400 text-base md:text-lg">Oops! Mobil tidak ditemukan.</p>
+            <div id="ai-results-container" class="hidden mb-12">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold font-bebas tracking-wider text-yellow-400 border-b-2 border-yellow-400 pb-1 inline-block">✨ REKOMENDASI AI</h2>
+                    <button onclick="closeAIResults()" class="text-sm text-gray-400 hover:text-white transition underline">Kembali ke Katalog</button>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6" id="aiGrid">
+                    </div>
+            </div>
+
+            <div id="original-catalog-container">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6" id="catalogGrid">
+                    
+                    @foreach($cars as $car)
+                        @php
+                            // Format slug biar cocok mutlak sama filter
+                            $carCategorySlug = \Illuminate\Support\Str::slug($car->category);
+                            $carNameSafe = trim(strtolower($car->name));
+                        @endphp
+                        <div class="car-card bg-gradient-to-b from-[#6D819C] to-[#4C5B79] rounded-3xl p-5 md:p-6 shadow-xl border border-white/5 flex flex-col justify-between relative overflow-hidden" 
+                             data-category="{{ $carCategorySlug }}" 
+                             data-name="{{ $carNameSafe }}">
+                            
+                            @if($car->stock <= 0)
+                                <div class="absolute inset-0 bg-[#171B2D]/70 backdrop-blur-[2px] z-20 flex items-center justify-center pointer-events-none">
+                                    <span class="bg-red-500 text-white px-5 py-2 rounded-full font-bold text-sm uppercase tracking-wider transform -rotate-12 border-2 border-white/20 shadow-2xl">
+                                        Habis Disewa
+                                    </span>
+                                </div>
+                            @endif
+
+                            <div class="relative z-10">
+                                <img src="{{ asset($car->image_path) }}" alt="{{ $car->name }}" class="w-full h-32 md:h-40 object-contain drop-shadow-2xl mb-4">
+                                <div class="flex justify-between items-end mb-4">
+                                    <div class="w-2/3 pr-2">
+                                        <h3 class="text-[10px] md:text-xs font-bold text-gray-200 uppercase mb-1 tracking-wider truncate">{{ $car->name }}</h3>
+                                        <div class="text-xl md:text-2xl font-extrabold text-white">
+                                            Rp {{ number_format($car->price_per_day, 0, ',', '.') }} 
+                                            <span class="text-[10px] font-normal text-gray-300">/day</span>
+                                        </div>
+                                        <p class="text-[9px] text-gray-300 mt-1 uppercase tracking-wide leading-relaxed">
+                                            Seats for {{ $car->seats }} &bull; {{ $car->transmission }} &bull; {{ $car->fuel_type }}
+                                        </p>
+                                    </div>
+                                    <div class="w-1/3 flex justify-end">
+                                        <img src="{{ asset($car->image_path) }}" alt="{{ $car->name }}" class="w-12 md:w-16 drop-shadow-lg opacity-80 object-contain">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="relative z-30">
+                                @if($car->stock > 0)
+                                    <a href="{{ route('user.car.detail', $car->slug) }}" class="block w-full py-2 md:py-2.5 rounded-full bg-gradient-to-r from-white/30 to-white/10 border border-white/30 text-white text-center text-sm md:text-base font-bold shadow-md hover:bg-white/40 transition backdrop-blur-md mt-2">
+                                        Book Now
+                                    </a>
+                                @else
+                                    <button disabled class="block w-full py-2 md:py-2.5 rounded-full bg-white/10 border border-white/10 text-white/50 text-center text-sm md:text-base font-bold cursor-not-allowed mt-2">
+                                        Stock Kosong
+                                    </button>
+                                @endif
+                            </div>
+                        </div>
+                    @endforeach
+
+                </div>
+
+                <div id="emptyState" class="text-center py-10 {{ $cars->count() > 0 ? 'hidden' : '' }}">
+                    <p class="text-gray-400 text-base md:text-lg">Oops! Mobil tidak ditemukan.</p>
+                </div>
             </div>
         </div>
     </div>
@@ -354,11 +389,100 @@
             }
         });
 
-        // LOGIKA FILTER & SEARCH DINAMIS (REAL-TIME) - SUDAH FIX 100%
+        // 🟢 FUNGSI AI TRIP ASSISTANT 🟢
+        async function askAI() {
+            const query = document.getElementById('ai-query').value;
+            const btn = document.getElementById('btn-ai');
+            const originalContainer = document.getElementById('original-catalog-container');
+            const aiContainer = document.getElementById('ai-results-container');
+            const aiGrid = document.getElementById('aiGrid');
+
+            if (!query) return alert('Ketik dulu rencana liburanmu bre!');
+
+            // Animasi loading
+            const originalBtnText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-xl"></i>';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch("{{ route('user.catalog.ai') }}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": "{{ csrf_token() }}" 
+                    },
+                    body: JSON.stringify({ query: query })
+                });
+
+                const result = await response.json();
+
+                if (result.success && result.data.length > 0) {
+                    // Sembunyikan katalog asli, tampilkan hasil AI
+                    originalContainer.classList.add('hidden');
+                    aiContainer.classList.remove('hidden');
+                    aiGrid.innerHTML = '';
+                    
+                    // Render card mobil ala Tripzy
+                    result.data.forEach(car => {
+                        // Format Rupiah
+                        const priceFmt = new Intl.NumberFormat('id-ID').format(car.price_per_day);
+                        
+                        aiGrid.innerHTML += `
+                            <div class="car-card bg-gradient-to-b from-[#6D819C] to-[#4C5B79] rounded-3xl p-5 md:p-6 shadow-2xl shadow-blue-900/20 border border-yellow-400/30 flex flex-col justify-between relative overflow-hidden">
+                                <div class="absolute top-0 right-0 bg-yellow-400 text-black text-[9px] font-bold px-3 py-1 rounded-bl-lg z-20"><i class="fa-solid fa-star"></i> AI Pick</div>
+                                <div class="relative z-10">
+                                    <img src="/${car.image_path}" class="w-full h-32 md:h-40 object-contain drop-shadow-2xl mb-4">
+                                    <div class="flex justify-between items-end mb-4">
+                                        <div class="w-2/3 pr-2">
+                                            <h3 class="text-[10px] md:text-xs font-bold text-gray-200 uppercase mb-1 tracking-wider truncate">${car.name}</h3>
+                                            <div class="text-xl md:text-2xl font-extrabold text-white">
+                                                Rp ${priceFmt} <span class="text-[10px] font-normal text-gray-300">/day</span>
+                                            </div>
+                                            <p class="text-[9px] text-gray-300 mt-1 uppercase tracking-wide leading-relaxed">
+                                                Seats for ${car.seats} &bull; ${car.transmission}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="relative z-30">
+                                    <a href="/dashboard/catalog/${car.slug}" class="block w-full py-2 md:py-2.5 rounded-full bg-gradient-to-r from-yellow-400 to-yellow-500 text-black text-center text-sm md:text-base font-bold shadow-md hover:scale-105 transition mt-2">
+                                        Book Recommended Car
+                                    </a>
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    alert(result.message || "Waduh, AI nggak nemu mobil yang pas nih. Coba kata kunci lain ya.");
+                }
+            } catch (error) {
+                console.error("AI Error:", error);
+                alert("Terjadi kesalahan sistem AI.");
+            } finally {
+                btn.innerHTML = originalBtnText;
+                btn.disabled = false;
+            }
+        }
+
+        // Fungsi kembalikan tampilan dari hasil AI ke Katalog Normal
+        function closeAIResults() {
+            document.getElementById('ai-query').value = '';
+            document.getElementById('ai-results-container').classList.add('hidden');
+            document.getElementById('original-catalog-container').classList.remove('hidden');
+        }
+
+        function resetAIFilter() {
+            // Kalau user lagi liat hasil AI terus ngeklik filter biasa, tutup hasil AI-nya
+            if(!document.getElementById('ai-results-container').classList.contains('hidden')) {
+                closeAIResults();
+            }
+        }
+
+        // LOGIKA FILTER & SEARCH DINAMIS (REAL-TIME)
         document.addEventListener("DOMContentLoaded", function() {
             const filterBtns = document.querySelectorAll('.filter-btn');
             const searchInput = document.getElementById('searchInput');
-            const carCards = document.querySelectorAll('.car-card');
+            const carCards = document.querySelectorAll('.car-card:not(#aiGrid .car-card)'); // Hanya filter card katalog asli
             const emptyState = document.getElementById('emptyState');
 
             let currentFilter = 'all';
@@ -372,7 +496,6 @@
                     const name = card.getAttribute('data-name');
                     
                     const matchesSearch = name.includes(currentSearch);
-                    // 🟢 INI KUNCI FIX-NYA: Pakai '===' biar MPV nggak disamakan sama Premium MPV
                     const matchesFilter = (currentFilter === 'all' || category === currentFilter);
 
                     if (matchesFilter && matchesSearch) {
@@ -408,7 +531,6 @@
                     this.classList.add('bg-white/10', 'text-white', 'shadow-sm', 'font-semibold');
                     this.classList.remove('hover:text-white');
 
-                    // Filter sekarang pakai atribut khusus 'data-filter'
                     currentFilter = this.getAttribute('data-filter').toLowerCase();
                     filterCars();
                 });
@@ -416,9 +538,17 @@
 
             if(searchInput) {
                 searchInput.addEventListener('input', function(e) {
+                    resetAIFilter(); // Tutup AI kalau user ngetik di search biasa
                     currentSearch = e.target.value.toLowerCase().trim();
                     filterCars();
                 });
+            }
+        });
+    </script>
+    <script>
+        window.addEventListener('pageshow', function (event) {
+            if (event.persisted || (typeof window.performance != "undefined" && window.performance.navigation.type === 2)) {
+                window.location.reload();
             }
         });
     </script>

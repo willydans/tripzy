@@ -25,14 +25,15 @@ class AdminCarController extends Controller
             'category' => 'required|string',
             'status' => 'required|string',
             'price_per_day' => 'required|integer',
-            'stock' => 'required|integer|min:0', // <-- Validasi Stock
-            'service_date' => 'nullable|date', // <-- Validasi Tanggal Servis
+            'stock' => 'required|integer|min:0',
+            'service_date' => 'nullable|date',
             'year' => 'required|string',
             'color' => 'required|string',
             'fuel_type' => 'required|string',
             'transmission' => 'required|string',
             'seats' => 'required|integer',
-            'image' => 'required|image|mimes:jpeg,png,jpg|max:2048', // Max 2MB
+            'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048', // 🟢 FIX: Tambah webp
+            'description' => 'nullable|string',
         ]);
 
         // Upload Gambar
@@ -43,10 +44,10 @@ class AdminCarController extends Controller
         Car::create([
             'name' => $request->name,
             'slug' => Str::slug($request->name . '-' . Str::random(5)),
-            'description' => 'Kenyamanan berkendara dengan ' . $request->name, // Default text
+            'description' => $request->description,
             'price_per_day' => $request->price_per_day,
-            'stock' => $request->stock, // <-- Simpan Stock
-            'service_date' => $request->service_date, // <-- Simpan Tanggal Servis
+            'stock' => $request->stock,
+            'service_date' => $request->service_date,
             'image_path' => $imagePath,
             'year' => $request->year,
             'transmission' => $request->transmission,
@@ -70,14 +71,14 @@ class AdminCarController extends Controller
             'name' => 'required|string|max:255',
             'license_plate' => 'required|string|max:255',
             'price_per_day' => 'required|integer',
-            'stock' => 'required|integer|min:0', // <-- Validasi Stock
-            'service_date' => 'nullable|date', // <-- Validasi Tanggal Servis
-            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'stock' => 'required|integer|min:0',
+            'service_date' => 'nullable|date',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048', // 🟢 FIX: Tambah webp
+            'description' => 'nullable|string',
         ]);
 
         // Cek jika ada upload gambar baru
         if ($request->hasFile('image')) {
-            // Hapus gambar lama jika ada
             if (file_exists(public_path($car->image_path))) {
                 @unlink(public_path($car->image_path));
             }
@@ -92,13 +93,14 @@ class AdminCarController extends Controller
         $car->category = $request->category;
         $car->status = $request->status;
         $car->price_per_day = $request->price_per_day;
-        $car->stock = $request->stock; // <-- Update Stock
-        $car->service_date = $request->service_date; // <-- Update Tanggal Servis
+        $car->stock = $request->stock;
+        $car->service_date = $request->service_date;
         $car->year = $request->year;
         $car->color = $request->color;
         $car->fuel_type = $request->fuel_type;
         $car->transmission = $request->transmission;
         $car->seats = $request->seats;
+        $car->description = $request->description;
         $car->save();
 
         return redirect()->back()->with('success', $request->name . ' car successfully edited');
@@ -110,7 +112,6 @@ class AdminCarController extends Controller
         $car = Car::findOrFail($id);
         $carName = $car->name;
         
-        // Hapus file gambar dari folder
         if (file_exists(public_path($car->image_path))) {
             @unlink(public_path($car->image_path));
         }

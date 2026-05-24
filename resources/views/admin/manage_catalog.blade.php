@@ -82,6 +82,33 @@
     </script>
     @endif
 
+    @if($errors->any())
+    <div id="errorNotification" class="fixed inset-0 flex items-center justify-center z-[100] bg-black/40 backdrop-blur-sm transition-opacity duration-300 px-4">
+        <div class="bg-white rounded-2xl p-6 md:p-8 flex flex-col items-center shadow-2xl relative w-full max-w-sm transform scale-100 transition-transform border border-red-100">
+            <button onclick="closeErrorToast()" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 text-xl transition"><i class="fa-solid fa-xmark"></i></button>
+            <div class="w-12 h-12 md:w-16 md:h-16 bg-red-500 rounded-full flex items-center justify-center text-white text-2xl md:text-3xl mb-4 shadow-lg">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="text-[#1C2C4A] text-lg md:text-xl font-bold text-center leading-snug mb-2">Gagal Menyimpan!</h3>
+            <ul class="text-xs md:text-sm text-red-500 font-medium text-center list-none space-y-1">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+            <button onclick="closeErrorToast()" class="mt-6 w-full bg-[#F4F7FC] text-[#6B85B5] font-bold py-2 rounded-full hover:bg-gray-200 transition">Tutup</button>
+        </div>
+    </div>
+    <script>
+        function closeErrorToast() {
+            const errorToast = document.getElementById('errorNotification');
+            if(errorToast) { 
+                errorToast.style.opacity = '0'; 
+                setTimeout(() => errorToast.remove(), 300); 
+            }
+        }
+    </script>
+    @endif
+
     <div id="sidebarOverlay" class="fixed inset-0 bg-black/50 z-30 hidden md:hidden transition-opacity opacity-0" onclick="toggleSidebar()"></div>
 
     <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 sidebar-bg text-white flex flex-col h-full shadow-2xl md:shadow-lg z-40 transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300 shrink-0">
@@ -342,6 +369,11 @@
                         <input type="date" name="service_date" class="form-input" style="color: #8CA1C4;" onchange="this.style.color='#1C2C4A'">
                     </div>
 
+                    <div class="col-span-1 sm:col-span-2">
+                        <label class="form-label">Description / Features & Facilities</label>
+                        <textarea name="description" rows="4" placeholder="Example: AC Dingin, Audio Premium, Kamera Parkir 360..." class="form-input resize-y"></textarea>
+                    </div>
+
                 </div>
                 
                 <div class="mb-8">
@@ -469,6 +501,11 @@
                         <label class="form-label">Last Servis Date</label>
                         <input type="date" id="edit_service_date" name="service_date" class="form-input" style="color:#1C2C4A;">
                     </div>
+
+                    <div class="col-span-1 sm:col-span-2">
+                        <label class="form-label">Description / Features & Facilities</label>
+                        <textarea id="edit_description" name="description" rows="4" placeholder="Example: AC Dingin, Audio Premium, Kamera Parkir 360..." class="form-input resize-y"></textarea>
+                    </div>
                 </div>
 
                 <div class="flex flex-col-reverse sm:flex-row justify-end gap-4 mt-8 pt-6 border-t border-gray-100">
@@ -579,6 +616,9 @@
             document.getElementById('edit_transmission').value = car.transmission;
             document.getElementById('edit_seats').value = car.seats;
             
+            // 🟢 TAMPILIN DATA DESKRIPSI KE TEXTAREA 🟢
+            document.getElementById('edit_description').value = car.description || '';
+            
             if(car.service_date) {
                 document.getElementById('edit_service_date').value = car.service_date.split('T')[0];
             }
@@ -595,7 +635,7 @@
             toggleModal('deleteCarModal');
         }
 
-        // 🟢 LOGIKA FILTER DAN SEARCH REAL-TIME 🟢
+        // LOGIKA FILTER DAN SEARCH REAL-TIME
         document.addEventListener("DOMContentLoaded", function() {
             const searchInput = document.getElementById('searchInput');
             const statusFilter = document.getElementById('statusFilter');
@@ -636,6 +676,13 @@
             searchInput.addEventListener('input', filterTable);
             statusFilter.addEventListener('change', filterTable);
             categoryFilter.addEventListener('change', filterTable);
+        });
+    </script>
+    <script>
+        window.addEventListener('pageshow', function (event) {
+            if (event.persisted || (typeof window.performance != "undefined" && window.performance.navigation.type === 2)) {
+                window.location.reload();
+            }
         });
     </script>
 </body>

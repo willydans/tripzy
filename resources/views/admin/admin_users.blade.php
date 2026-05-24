@@ -214,7 +214,7 @@
                                 <p class="text-[9px] md:text-[10px] text-[#8CA1C4]">{{ $user->nomor_hp ?? '-' }}</p>
                             </td>
                             <td class="py-3 px-3 md:px-4">
-                                <span class="font-bold uppercase tracking-wider text-[10px] {{ $user->role == 'admin' ? 'text-[#4A6EB0]' : 'text-gray-500' }}">
+                                <span class="font-bold uppercase tracking-wider text-[10px] {{ strtolower($user->role) == 'admin' ? 'text-[#4A6EB0]' : 'text-gray-500' }}">
                                     {{ $user->role }}
                                 </span>
                             </td>
@@ -661,7 +661,10 @@
             document.getElementById('edit_name').value = user.name || '';
             document.getElementById('edit_email').value = user.email || '';
             document.getElementById('edit_phone').value = user.nomor_hp || '';
-            document.getElementById('edit_role').value = user.role || 'user';
+            
+            // 🟢 FIX: Pastikan value role dari database di-convert ke huruf kecil
+            let roleVal = user.role ? user.role.toLowerCase() : 'user';
+            document.getElementById('edit_role').value = roleVal;
             
             let stat = user.status || 'Pending';
             if(stat === 'Aktif') stat = 'Active';
@@ -715,7 +718,7 @@
                 btnSubmit.innerText = "Blacklist";
                 btnSubmit.className = "w-1/2 py-3 rounded-xl text-white font-bold transition shadow-md bg-gray-600 hover:bg-gray-800";
             } else {
-                form.action = `/admin/users/${id}/unblacklist`; // Pastiin route ini ada di backend lu ya
+                form.action = `/admin/users/${id}/unblacklist`;
                 title.innerText = "Unblacklist User?";
                 title.className = "text-2xl font-bold mb-2 text-green-600";
                 desc.innerHTML = `Are you sure you want to restore access for <strong class="text-green-600">${name}</strong>?`;

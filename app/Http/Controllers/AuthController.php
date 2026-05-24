@@ -55,8 +55,11 @@ class AuthController extends Controller
             $request->session()->regenerate();
             
             // 👇 LOGIKA RBAC (Role-Based Access Control) 👇
+            // 🟢 FIX: Ubah role jadi huruf kecil semua biar gak bocor gara-gara huruf besar/kecil
+            $role = strtolower(trim($user->role));
+
             // Kalo yang login role-nya admin, lempar ke Dashboard Admin
-            if ($user->role === 'admin') {
+            if ($role === 'admin') {
                 return redirect()->route('admin.dashboard');
             }
             
@@ -135,7 +138,7 @@ class AuthController extends Controller
             ]
         );
 
-        // Kirim email pake Mailtrap / SMTP Gmail
+        // Kirim email pake Mailtrap / SMTP
         Mail::to($request->email)->send(new SendOtpMail($otp));
 
         return response()->json(['success' => true, 'message' => 'OTP berhasil dikirim ke email.']);

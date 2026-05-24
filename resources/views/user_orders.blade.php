@@ -265,7 +265,7 @@
                 <h3 class="text-xl font-bold text-[#7A9FE0] mb-4">Contact Us</h3>
                 <ul class="space-y-4 text-xs font-medium text-gray-400">
                     <li class="flex items-start gap-3"><i class="fa-solid fa-location-dot mt-1 text-[#7A9FE0] shrink-0"></i><span>Jl. Prof. Dr. Ir. Sumantri Brojonegoro No.1, Gedong Meneng, Kec. Rajabasa, Bandar Lampung 35141</span></li>
-                    <li class="flex items-center gap-3"><i class="fa-solid fa-phone text-[#7A9FE0] shrink-0"></i><span>+6285276139801</span></li>
+                    <li class="flex items-center gap-3"><i class="fa-solid fa-phone text-[#7A9FE0] shrink-0"></i><span>+6285278139801</span></li>
                     <li class="flex items-center gap-3"><i class="fa-solid fa-envelope text-[#7A9FE0] shrink-0"></i><span>tripzy@gmail.com</span></li>
                     <li class="flex items-start gap-3"><i class="fa-solid fa-clock mt-1 text-[#7A9FE0] shrink-0"></i><span>Senin - Minggu<br>24 Jam</span></li>
                 </ul>
@@ -276,7 +276,7 @@
     @if(!$bookings->isEmpty())
     <div id="detailModal" class="fixed inset-0 z-[100] flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300 p-4">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeModal()"></div>
-        <div class="modal-card rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto relative shadow-2xl p-5 md:p-8 z-10 text-white">
+        <div class="modal-card rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto relative shadow-2xl p-5 md:p-8 z-10 text-white hide-scroll">
             
             <div class="flex justify-between items-center mb-6 border-b border-white/20 pb-4">
                 <h2 class="text-base md:text-lg font-bold tracking-widest uppercase flex items-center gap-2"><i class="fa-regular fa-file-lines"></i> DETAILS</h2>
@@ -311,7 +311,7 @@
                 </div>
                 <div class="bg-white/10 p-3 rounded-lg border border-white/20">
                     <p class="text-[10px] text-gray-300 uppercase tracking-wider mb-1">PICK UP TIME</p>
-                    <p id="mdl_pickup" class="font-bold text-xs md:text-sm uppercase">10.00 AM</p>
+                    <p id="mdl_pickup" class="font-bold text-xs md:text-sm uppercase"></p>
                 </div>
             </div>
 
@@ -329,6 +329,43 @@
                         <div id="doc_sim" class="bg-white/80 text-black text-[10px] md:text-xs font-semibold py-1.5 px-3 rounded-md shadow flex-grow text-center truncate">sim</div>
                         <div id="doc_selfie" class="bg-white/80 text-black text-[10px] md:text-xs font-semibold py-1.5 px-3 rounded-md shadow flex-grow text-center truncate">selfie</div>
                     </div>
+                </div>
+            </div>
+
+            <div id="mdl_return_details_container" class="hidden flex-col gap-4 mb-6 pt-4 border-t border-white/20 text-sm">
+                <p class="text-[10px] md:text-xs font-bold text-gray-300 uppercase tracking-wider mb-2">INSPECTION RETURN RESULTS</p>
+                
+                <div class="bg-white/10 p-4 rounded-lg border border-white/20 grid grid-cols-2 gap-y-3 text-xs md:text-sm">
+                    <span class="text-gray-300">Body & Exterior:</span>
+                    <span id="mdl_ret_body" class="font-bold text-white text-right"></span>
+
+                    <span class="text-gray-300">Interior:</span>
+                    <span id="mdl_ret_interior" class="font-bold text-white text-right"></span>
+
+                    <span class="text-gray-300">Tire Condition:</span>
+                    <span id="mdl_ret_tire" class="font-bold text-white text-right"></span>
+
+                    <span class="text-gray-300">Mileage:</span>
+                    <span id="mdl_ret_mileage" class="font-bold text-white text-right"></span>
+
+                    <span class="text-gray-300">Delay:</span>
+                    <span id="mdl_ret_delay" class="font-bold text-white text-right"></span>
+                </div>
+
+                <div class="bg-white/10 p-4 rounded-lg border border-white/20 grid grid-cols-2 gap-y-3 text-xs md:text-sm">
+                    <span class="text-gray-300">Damage Fine:</span>
+                    <span id="mdl_ret_dmg_fine" class="font-bold text-red-300 text-right"></span>
+
+                    <span class="text-gray-300">Late Fine:</span>
+                    <span id="mdl_ret_late_fine" class="font-bold text-red-300 text-right"></span>
+
+                    <span class="text-gray-300 font-bold mt-2 pt-2 border-t border-white/20">Total Fine:</span>
+                    <span id="mdl_ret_total_fine" class="font-extrabold text-red-400 text-right text-base mt-2 pt-2 border-t border-white/20"></span>
+                </div>
+
+                <div class="bg-white/10 p-4 rounded-lg border border-white/20 text-xs md:text-sm">
+                    <span class="text-gray-300 block mb-1 text-[10px] uppercase font-bold">General Notes:</span>
+                    <p id="mdl_ret_notes" class="text-white italic"></p>
                 </div>
             </div>
 
@@ -457,6 +494,28 @@
             document.getElementById('doc_sim').innerText = getFileName(booking.doc_sim);
             document.getElementById('doc_selfie').innerText = getFileName(booking.doc_selfie);
 
+            // 🟢 FIX: LOGIKA MENAMPILKAN INSPECTION RETURN RESULTS 🟢
+            const retContainer = document.getElementById('mdl_return_details_container');
+            if(booking.status === 'History' && booking.body_condition) {
+                document.getElementById('mdl_ret_body').innerText = booking.body_condition;
+                document.getElementById('mdl_ret_interior').innerText = booking.interior_condition || 'Good';
+                document.getElementById('mdl_ret_tire').innerText = booking.tire_condition || 'Good';
+                document.getElementById('mdl_ret_mileage').innerText = (booking.mileage || '0') + ' KM';
+                document.getElementById('mdl_ret_delay').innerText = (booking.delay_hours || '0') + ' Jam';
+                
+                document.getElementById('mdl_ret_dmg_fine').innerText = formatRupiah(booking.damage_fine || 0);
+                document.getElementById('mdl_ret_late_fine').innerText = formatRupiah(booking.late_fine || 0);
+                document.getElementById('mdl_ret_total_fine').innerText = formatRupiah((booking.damage_fine || 0) + (booking.late_fine || 0));
+                
+                document.getElementById('mdl_ret_notes').innerText = booking.general_notes || '-';
+                
+                retContainer.classList.remove('hidden');
+                retContainer.classList.add('flex');
+            } else {
+                retContainer.classList.add('hidden');
+                retContainer.classList.remove('flex');
+            }
+
             const baseTotal = car.price_per_day * diffDays;
             document.getElementById('mdl_price_calc').innerText = `${formatRupiah(car.price_per_day)} X ${diffDays} DAY`;
             document.getElementById('mdl_price_subtotal').innerText = formatRupiah(baseTotal);
@@ -491,6 +550,13 @@
             modal.classList.add('opacity-0', 'pointer-events-none');
             document.body.classList.remove('overflow-hidden');
         }
+    </script>
+    <script>
+        window.addEventListener('pageshow', function (event) {
+            if (event.persisted || (typeof window.performance != "undefined" && window.performance.navigation.type === 2)) {
+                window.location.reload();
+            }
+        });
     </script>
 </body>
 </html>

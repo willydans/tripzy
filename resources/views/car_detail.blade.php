@@ -197,7 +197,7 @@
                     Rp{{ number_format($car->price_per_day, 0, ',', '.') }}<span class="text-sm md:text-lg font-normal text-[#6C82A3]">/day</span>
                 </div>
 
-                <p class="text-gray-300 text-xs md:text-sm leading-relaxed mb-6 md:mb-8">{{ $car->description }}</p>
+                <p class="text-gray-300 text-xs md:text-sm leading-relaxed mb-6 md:mb-8">Kenyamanan berkendara dengan {{ $car->name }}</p>
 
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 md:gap-3 mb-6 md:mb-8">
                     <div class="spec-badge rounded-md px-2 md:px-3 py-2 text-center text-[10px] md:text-xs font-semibold tracking-wider">{{ $car->year }}</div>
@@ -211,13 +211,11 @@
                 </div>
 
                 <h2 class="text-xl md:text-2xl font-bold font-bebas tracking-wide uppercase mb-3 md:mb-4">FEATURES & FACILITIES</h2>
-                <div class="flex flex-wrap gap-2 md:gap-3 mb-8 lg:mb-0">
-                    @if($car->facilities)
-                        @foreach($car->facilities as $facility)
-                            <div class="spec-badge rounded-md px-3 md:px-4 py-1.5 md:py-2 text-[10px] md:text-xs font-bold tracking-wider uppercase">{{ $facility }}</div>
-                        @endforeach
+                <div class="mb-8 lg:mb-0">
+                    @if(!empty($car->description))
+                        <p class="text-gray-300 text-xs md:text-sm leading-relaxed">{!! nl2br(e($car->description)) !!}</p>
                     @else
-                        <p class="text-xs md:text-sm text-gray-400">No additional facilities listed.</p>
+                        <p class="text-xs md:text-sm text-gray-500 italic">No additional facilities listed.</p>
                     @endif
                 </div>
             </div>
@@ -255,12 +253,20 @@
                     </div>
                     <div class="mb-4">
                         <label class="block text-[#6C82A3] text-[10px] md:text-xs font-semibold uppercase tracking-wider mb-1 md:mb-2">ID NUMBER (KTP / PASSPORT)</label>
-                        <input type="text" name="renter_id_number" placeholder="Contoh: 1803xxxxxxxxxxxx" class="form-input w-full rounded-md px-3 py-2 text-sm" required value="{{ old('renter_id_number') }}" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                        <input type="text" name="renter_id_number" placeholder="Contoh: 1803xxxxxxxxxxxx" class="form-input w-full rounded-md px-3 py-2 text-sm transition-all" required value="{{ old('renter_id_number') }}" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                     </div>
                     
                     <div class="mb-6">
                         <label class="block text-[#6C82A3] text-[10px] md:text-xs font-semibold uppercase tracking-wider mb-1 md:mb-2">PICKUP TIME</label>
                         <input type="time" name="pickup_time" id="pickup_time" class="form-input w-full rounded-md px-3 py-2 text-sm" required value="{{ old('pickup_time') }}">
+                    </div>
+
+                    <div id="weather-info" class="hidden mb-6 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-500/30 rounded-xl p-3 flex items-center gap-3 transition-all duration-300 shadow-sm">
+                        <div id="weather-icon" class="bg-white/10 rounded-full p-1 shrink-0"></div>
+                        <div>
+                            <p class="text-[9px] md:text-[10px] text-blue-300 font-bold uppercase tracking-wider mb-0.5">Prediksi Cuaca Bandar Lampung</p>
+                            <p id="weather-desc" class="text-xs md:text-sm text-white font-medium leading-tight"></p>
+                        </div>
                     </div>
 
                     <div class="mb-3 md:mb-4">
@@ -404,7 +410,7 @@
             }
         });
 
-        // 🟢 FIX: Validasi Waktu Pickup
+        // Validasi Waktu Pickup
         function checkPickupTime() {
             const dateInput = document.getElementById('start_date');
             const timeInput = document.getElementById('pickup_time');
@@ -414,13 +420,11 @@
             const now = new Date();
             const selectedDate = new Date(dateInput.value);
             
-            // Format waktu saat ini untuk komparasi YYYY-MM-DD
             const currentYear = now.getFullYear();
             const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
             const currentDay = String(now.getDate()).padStart(2, '0');
             const todayStr = `${currentYear}-${currentMonth}-${currentDay}`;
 
-            // Jika tanggal yang dipilih adalah hari ini
             if (dateInput.value === todayStr) {
                 const currentHours = String(now.getHours()).padStart(2, '0');
                 const currentMinutes = String(now.getMinutes()).padStart(2, '0');
@@ -428,7 +432,7 @@
 
                 if (timeInput.value < currentTimeStr) {
                     alert('Peringatan: Waktu pickup untuk hari ini tidak boleh di masa lalu (sebelum jam ' + currentTimeStr + ')!');
-                    timeInput.value = currentTimeStr; // Reset ke jam saat ini
+                    timeInput.value = currentTimeStr; 
                     return false;
                 }
             }
@@ -438,16 +442,82 @@
         document.getElementById('start_date').addEventListener('change', checkPickupTime);
         document.getElementById('pickup_time').addEventListener('change', checkPickupTime);
 
+        // FUNGSI CEK CUACA OTOMATIS VIA OPENWEATHER
+        async function checkWeather() {
+            const dateInput = document.getElementById('start_date').value;
+            const weatherContainer = document.getElementById('weather-info');
+            const weatherDesc = document.getElementById('weather-desc');
+            const weatherIcon = document.getElementById('weather-icon');
 
-        // 🟢 FIX: Validasi KTP atau Passport Saat Submit Form
+            if (!dateInput) {
+                weatherContainer.classList.add('hidden');
+                return;
+            }
+
+            const selectedDate = new Date(dateInput);
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            selectedDate.setHours(0,0,0,0);
+
+            const diffTime = selectedDate - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays >= 0 && diffDays <= 5) {
+                weatherDesc.innerText = "Memuat prediksi cuaca...";
+                weatherIcon.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-blue-300 text-xl"></i>`;
+                weatherContainer.classList.remove('hidden');
+
+                const API_KEY = '7242f54dd3a7fdd3705e370c89ef7ca3'; 
+                const CITY = 'Bandar Lampung'; 
+
+                try {
+                    const response = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${CITY},id&appid=${API_KEY}&units=metric&lang=id`);
+                    const data = await response.json();
+
+                    if (response.ok && data.list) {
+                        const targetDateStr = dateInput;
+                        const forecast = data.list.find(item => item.dt_txt.includes(targetDateStr) && item.dt_txt.includes('12:00:00')) 
+                                       || data.list.find(item => item.dt_txt.includes(targetDateStr));
+
+                        if (forecast) {
+                            const temp = Math.round(forecast.main.temp);
+                            const desc = forecast.weather[0].description;
+                            const iconCode = forecast.weather[0].icon;
+
+                            weatherIcon.innerHTML = `<img src="https://openweathermap.org/img/wn/${iconCode}@2x.png" alt="weather" class="w-10 h-10 drop-shadow-md">`;
+
+                            let tips = "Cocok banget buat jalan-jalan! 🚗✨";
+                            if (desc.includes('hujan')) tips = "Sedia payung dan hati-hati jalanan licin ya! 🌧️☔";
+                            if (desc.includes('awan') || desc.includes('cerah')) tips = "Cuaca asik buat keliling kota! 🌤️🕶️";
+
+                            weatherDesc.innerHTML = `Diprediksi <strong>${desc} (${temp}°C)</strong> pada tanggal penyewaan. ${tips}`;
+                        } else {
+                            weatherContainer.classList.add('hidden');
+                        }
+                    } else {
+                        console.error("OpenWeather Error:", data.message);
+                        weatherIcon.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-yellow-400 text-xl"></i>`;
+                        weatherDesc.innerHTML = `<span class="text-yellow-200">Sistem cuaca sedang memverifikasi akses. Coba lagi dalam 15-30 menit.</span>`;
+                    }
+                } catch (error) {
+                    console.error("Error Fetching Weather:", error);
+                    weatherIcon.innerHTML = `<i class="fa-solid fa-wifi text-red-400 text-xl"></i>`;
+                    weatherDesc.innerHTML = `<span class="text-red-300">Gagal terhubung ke server cuaca.</span>`;
+                }
+            } else {
+                weatherContainer.classList.add('hidden');
+            }
+        }
+        document.getElementById('start_date').addEventListener('change', checkWeather);
+
+
+        // Validasi KTP atau Passport Saat Submit Form
         document.getElementById('bookingForm').addEventListener('submit', function(e) {
-            // Validasi Waktu
             if (!checkPickupTime()) {
                 e.preventDefault();
                 return;
             }
 
-            // Validasi KTP/Passport
             const ktpInput = document.querySelector('input[name="doc_ktp"]');
             const passportInput = document.querySelector('input[name="doc_passport"]');
 
@@ -460,7 +530,53 @@
             }
         });
 
-        // 🟢 FIX: Fungsi preview dokumen upload saling membersihkan (Mutually Exclusive)
+        // FUNGSI OCR UNTUK SCAN KTP OTOMATIS
+        async function scanKTP(file) {
+            const idInput = document.querySelector('input[name="renter_id_number"]');
+            const originalPlaceholder = idInput.placeholder;
+            
+            idInput.value = '';
+            idInput.placeholder = 'Memindai KTP... Mohon tunggu...';
+            idInput.disabled = true;
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('apikey', 'K83679795488957'); 
+            formData.append('language', 'eng');
+            formData.append('OCREngine', '2'); 
+
+            try {
+                const response = await fetch('https://api.ocr.space/parse/image', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (data.ParsedResults && data.ParsedResults[0] && data.ParsedResults[0].ParsedText) {
+                    const text = data.ParsedResults[0].ParsedText;
+                    
+                    const nikMatch = text.match(/\d{16}/); 
+                    
+                    if (nikMatch) {
+                        idInput.value = nikMatch[0];
+                        idInput.classList.add('border-green-500', 'bg-green-500/10');
+                        setTimeout(() => idInput.classList.remove('border-green-500', 'bg-green-500/10'), 3000);
+                    } else {
+                        alert("Gagal menemukan NIK pada gambar. Pastikan gambar jelas atau ketik manual.");
+                    }
+                } else {
+                    alert("Gambar terlalu buram atau gagal dipindai. Silakan ketik manual.");
+                }
+            } catch (error) {
+                console.error("Error OCR:", error);
+                alert("Koneksi ke server pemindai gagal. Silakan ketik NIK manual.");
+            } finally {
+                idInput.placeholder = originalPlaceholder;
+                idInput.disabled = false;
+            }
+        }
+
+        // Fungsi preview dokumen upload saling membersihkan (Mutually Exclusive)
         function previewDocument(event, previewId, textId, overlayId) {
             const input = event.target;
             const preview = document.getElementById(previewId);
@@ -483,7 +599,6 @@
                     return;
                 }
 
-                // Logika membersihkan jika user pilih input yang satunya
                 if (input.name === 'doc_ktp') {
                     const passInput = document.querySelector('input[name="doc_passport"]');
                     passInput.value = '';
@@ -491,6 +606,9 @@
                     document.getElementById('preview-passport').classList.add('hidden');
                     document.getElementById('text-passport').classList.remove('hidden');
                     document.getElementById('overlay-passport').classList.add('hidden');
+
+                    scanKTP(file);
+
                 } else if (input.name === 'doc_passport') {
                     const ktpInput = document.querySelector('input[name="doc_ktp"]');
                     ktpInput.value = '';
@@ -564,6 +682,13 @@
             });
 
             checkboxDriver.addEventListener('change', calculateTotal);
+        });
+    </script>
+    <script>
+        window.addEventListener('pageshow', function (event) {
+            if (event.persisted || (typeof window.performance != "undefined" && window.performance.navigation.type === 2)) {
+                window.location.reload();
+            }
         });
     </script>
 </body>

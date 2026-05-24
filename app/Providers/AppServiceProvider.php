@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\URL; // 🟢 FIX: Wajib import Facade URL untuk force HTTPS
 use App\Models\Booking;
 use Carbon\Carbon;
 
@@ -23,6 +24,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // 🟢 FIX: Paksa Laravel pakai HTTPS jika diakses lewat Ngrok / Proxy HTTPS
+        if (env('APP_ENV') !== 'local' || request()->server('HTTP_X_FORWARDED_PROTO') == 'https') {
+            URL::forceScheme('https');
+        }
+
         // View Composer: Logika ini akan dijalankan di semua file tampilan (blade)
         View::composer('*', function ($view) {
             $notifs = collect();

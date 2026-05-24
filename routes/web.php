@@ -81,6 +81,10 @@ Route::middleware('auth')->group(function () {
         return view('user_catalog', compact('cars')); 
     })->name('user.catalog');
 
+    // 🟢 ROUTE AI TRIP ASSISTANT (GEMINI) 🟢
+    // Wajib ditaruh di atas route {slug} agar tidak dianggap sebagai slug mobil
+    Route::post('/dashboard/catalog/ai-recommend', [App\Http\Controllers\CarController::class, 'aiRecommend'])->name('user.catalog.ai');
+
     // Detail Mobil Khusus (Checkout)
     Route::get('/dashboard/catalog/{slug}', [App\Http\Controllers\CarController::class, 'show'])->name('user.car.detail');
     Route::post('/dashboard/catalog/{slug}/checkout', [OrderController::class, 'store'])->name('user.checkout.process');
@@ -137,10 +141,10 @@ Route::middleware(['auth', \App\Http\Middleware\IsAdmin::class])->group(function
 
     // ROUTE BARU BUAT USER MANAGEMENT (CRUD & BLACKLIST LENGKAP)
     Route::get('/admin/users', [AdminUserController::class, 'index'])->name('admin.users.index');
-    Route::post('/admin/users', [AdminUserController::class, 'store'])->name('admin.users.store'); // 👈 Rute Tambah User
-    Route::put('/admin/users/{id}', [AdminUserController::class, 'update'])->name('admin.users.update'); // 👈 Rute Edit User
-    Route::delete('/admin/users/{id}', [AdminUserController::class, 'destroy'])->name('admin.users.destroy'); // 👈 Rute Hapus User
+    Route::post('/admin/users', [AdminUserController::class, 'store'])->name('admin.users.store'); 
+    Route::put('/admin/users/{id}', [AdminUserController::class, 'update'])->name('admin.users.update'); 
+    Route::delete('/admin/users/{id}', [AdminUserController::class, 'destroy'])->name('admin.users.destroy'); 
     Route::post('/admin/users/{id}/verify', [AdminUserController::class, 'verify'])->name('admin.users.verify');
     Route::post('/admin/users/{id}/blacklist', [AdminUserController::class, 'blacklist'])->name('admin.users.blacklist');
-    Route::post('/admin/users/{id}/unblacklist', [AdminUserController::class, 'unblacklist'])->name('admin.users.unblacklist'); // 👈 Rute Lepas Blokir
+    Route::post('/admin/users/{id}/unblacklist', [AdminUserController::class, 'unblacklist'])->name('admin.users.unblacklist'); 
 });

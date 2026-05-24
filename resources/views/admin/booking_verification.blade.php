@@ -82,7 +82,7 @@
                 </button>
                 <div class="relative w-full max-w-[200px] md:max-w-xs lg:w-96 hidden sm:block">
                     <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-white"></i>
-                    <input type="text" placeholder="Search...." class="w-full glass-search text-white placeholder-white rounded-full py-2 md:py-2.5 pl-10 md:pl-12 pr-4 focus:outline-none focus:bg-white/30 transition shadow-inner text-sm md:text-base">
+                    <input type="text" placeholder="Search...." class="w-full glass-search text-white placeholder-white rounded-full py-2 md:py-2.5 pl-10 md:pl-12 pr-4 focus:outline-none focus:bg-white/30 transition shadow-inner text-sm md:text-base pointer-events-none opacity-50" readonly>
                 </div>
             </div>
             
@@ -169,10 +169,9 @@
                             elseif($booking->status == 'Ordered' && $booking->verified_at != null) { $uiStatus = 'Verified'; $color = 'bg-pink-300 text-white'; }
                             elseif($booking->status == 'Ordered' && $booking->verified_at == null) { $uiStatus = 'Pending'; $color = 'bg-orange-300 text-white'; }
                             elseif($booking->status == 'History') { $uiStatus = 'Completed'; $color = 'bg-green-300 text-white'; }
-                            elseif($booking->status == 'Pending Payment') { $uiStatus = 'Awaiting'; $color = 'bg-gray-300 text-white'; }
+                            elseif($booking->status == 'Pending Payment') { $uiStatus = 'Awaiting'; $color = 'bg-gray-400 text-white'; }
                             else { $uiStatus = 'Cancelled'; $color = 'bg-red-300 text-white'; }
                             
-                            // Siapkan string pencarian gabungan
                             $searchString = strtolower($booking->booking_code . ' ' . $booking->renter_name . ' ' . $booking->car->name);
                         @endphp
                         <tr class="booking-row border-b border-gray-50 hover:bg-gray-50 transition" 
@@ -194,8 +193,8 @@
                                 </div>
                             </td>
                             <td class="py-3 px-3 md:px-4 text-[#1C2C4A] text-[10px] md:text-[11px] font-medium whitespace-nowrap">
-                                {{ $booking->start_date->format('Y-m-d') }}<br>
-                                <span class="text-gray-400 font-normal">s/d</span> {{ $booking->end_date->format('Y-m-d') }}
+                                {{ \Carbon\Carbon::parse($booking->start_date)->format('Y-m-d') }}<br>
+                                <span class="text-gray-400 font-normal">s/d</span> {{ \Carbon\Carbon::parse($booking->end_date)->format('Y-m-d') }}
                             </td>
                             <td class="py-3 px-3 md:px-4">
                                 <span class="{{ $color }} px-3 py-1 text-[9px] md:text-[10px] rounded-full font-bold shadow-sm whitespace-nowrap">{{ $uiStatus }}</span>
@@ -225,95 +224,104 @@
         </main>
     </div>
 
-    <div id="detailModal" class="fixed inset-0 z-[60] flex items-center justify-center opacity-0 pointer-events-none modal px-4">
+    <div id="detailModal" class="fixed inset-0 z-[60] flex items-center justify-center opacity-0 pointer-events-none modal px-4 py-6">
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="toggleModal('detailModal')"></div>
-        <div class="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto relative shadow-2xl p-5 md:p-8 z-10 hide-scroll">
+        
+        <div class="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] flex flex-col relative shadow-2xl z-10 overflow-hidden">
             
-            <div class="flex justify-between items-center mb-6 sticky top-0 bg-white z-20 pb-2 border-b border-gray-100">
+            <div class="flex justify-between items-center p-5 md:p-6 bg-white z-20 border-b border-gray-100 shrink-0 shadow-sm">
                 <h2 class="text-lg md:text-xl font-bold text-[#4A6EB0]">Detail Booking</h2>
-                <button onclick="toggleModal('detailModal')" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl md:text-2xl p-2"></i></button>
+                <button onclick="toggleModal('detailModal')" class="text-gray-400 hover:text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
             </div>
 
-            <div class="bg-[#F4F7FC] rounded-xl p-3 md:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3 sm:gap-0 border border-gray-100">
-                <div class="flex items-center gap-3 md:gap-4 w-full sm:w-auto">
-                    <div class="bg-white p-2 rounded-lg shadow-sm shrink-0"><img id="mdl_car_img" src="" class="w-12 h-8 object-contain"></div>
-                    <div>
-                        <h4 id="mdl_car_name" class="font-bold text-[#1C2C4A] text-sm md:text-base truncate"></h4>
-                        <p id="mdl_car_plate" class="text-[10px] md:text-xs text-[#8CA1C4] uppercase"></p>
+            <div class="p-5 md:p-6 overflow-y-auto hide-scroll flex-grow">
+                
+                <div id="mdl_late_info"></div>
+
+                <div class="bg-[#F4F7FC] rounded-xl p-3 md:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3 sm:gap-0 border border-gray-100">
+                    <div class="flex items-center gap-3 md:gap-4 w-full sm:w-auto">
+                        <div class="bg-white p-2 rounded-lg shadow-sm shrink-0"><img id="mdl_car_img" src="" class="w-12 h-8 object-contain"></div>
+                        <div>
+                            <h4 id="mdl_car_name" class="font-bold text-[#1C2C4A] text-sm md:text-base truncate"></h4>
+                            <p id="mdl_car_plate" class="text-[10px] md:text-xs text-[#8CA1C4] uppercase"></p>
+                        </div>
+                    </div>
+                    <span id="mdl_status_badge" class="px-3 py-1 md:px-4 md:py-1 text-[9px] md:text-[10px] rounded-full font-bold shadow-sm text-white shrink-0 self-end sm:self-auto"></span>
+                </div>
+
+                <div class="space-y-3 text-xs md:text-sm mb-6 border-b border-gray-100 pb-6">
+                    <div class="flex justify-between"><span class="text-gray-500 shrink-0 mr-4">Booking Code</span><span id="mdl_code" class="font-bold text-[#4A6EB0] truncate"></span></div>
+                    <div class="flex justify-between"><span class="text-gray-500 shrink-0 mr-4">User</span><span id="mdl_user" class="font-bold text-[#1C2C4A] truncate text-right"></span></div>
+                    <div class="flex justify-between"><span class="text-gray-500 shrink-0 mr-4">Phone Number</span><span id="mdl_phone" class="font-bold text-[#1C2C4A] truncate"></span></div>
+                    <div class="flex justify-between"><span class="text-gray-500 shrink-0 mr-4">Id Number</span><span id="mdl_idnum" class="font-bold text-[#1C2C4A] truncate"></span></div>
+                    <div class="flex justify-between"><span class="text-gray-500 shrink-0 mr-4">Date Pickup</span><span id="mdl_start" class="font-bold text-[#1C2C4A] truncate"></span></div>
+                    <div class="flex justify-between"><span class="text-gray-500 shrink-0 mr-4">Return Date</span><span id="mdl_end" class="font-bold text-[#1C2C4A] truncate"></span></div>
+                    <div class="flex justify-between"><span class="text-gray-500 shrink-0 mr-4">Payment status</span><span id="mdl_paystat" class="font-bold text-green-500 truncate"></span></div>
+                    <div class="flex justify-between"><span class="text-gray-500 shrink-0 mr-4">Total</span><span id="mdl_total" class="font-bold text-[#4A6EB0] truncate"></span></div>
+                    <div class="flex justify-between"><span class="text-gray-500 shrink-0 mr-4">Verified</span><span id="mdl_verified" class="font-bold text-[#1C2C4A] truncate"></span></div>
+                </div>
+
+                <div id="mdl_return_details_container" class="hidden mb-6 space-y-3 text-xs md:text-sm border-b border-gray-100 pb-6 bg-[#F8FAFC] p-4 rounded-xl">
+                    <h3 class="font-bold text-[#4A6EB0] text-sm uppercase tracking-wider mb-4 border-b border-gray-200 pb-2">Inspection Return Results</h3>
+                    
+                    <div class="grid grid-cols-2 gap-y-2">
+                        <span class="text-gray-500">Body & Exterior:</span>
+                        <span id="mdl_ret_body" class="font-bold text-[#1C2C4A] text-right"></span>
+                        
+                        <span class="text-gray-500">Interior:</span>
+                        <span id="mdl_ret_interior" class="font-bold text-[#1C2C4A] text-right"></span>
+                        
+                        <span class="text-gray-500">Tire Condition:</span>
+                        <span id="mdl_ret_tire" class="font-bold text-[#1C2C4A] text-right"></span>
+                        
+                        <span class="text-gray-500">Mileage:</span>
+                        <span id="mdl_ret_mileage" class="font-bold text-[#1C2C4A] text-right"></span>
+                        
+                        <span class="text-gray-500">Delay:</span>
+                        <span id="mdl_ret_delay" class="font-bold text-[#1C2C4A] text-right"></span>
+                    </div>
+
+                    <div class="pt-2 mt-2 border-t border-gray-200 grid grid-cols-2 gap-y-2">
+                        <span class="text-gray-500">Damage Fine:</span>
+                        <span id="mdl_ret_dmg_fine" class="font-bold text-red-500 text-right"></span>
+                        
+                        <span class="text-gray-500">Late Fine:</span>
+                        <span id="mdl_ret_late_fine" class="font-bold text-red-500 text-right"></span>
+                        
+                        <span class="text-gray-500 font-bold">Total Fine:</span>
+                        <span id="mdl_ret_total_fine" class="font-extrabold text-red-500 text-right text-base"></span>
+                    </div>
+
+                    <div class="mt-4">
+                        <span class="text-gray-500 block mb-1 text-[10px] uppercase font-bold">General Notes:</span>
+                        <p id="mdl_ret_notes" class="text-[#1C2C4A] bg-white p-3 rounded-lg border border-gray-200 italic"></p>
                     </div>
                 </div>
-                <span id="mdl_status_badge" class="px-3 py-1 md:px-4 md:py-1 text-[9px] md:text-[10px] rounded-full font-bold shadow-sm text-white shrink-0 self-end sm:self-auto"></span>
-            </div>
 
-            <div class="space-y-3 text-xs md:text-sm mb-6 border-b border-gray-100 pb-6">
-                <div class="flex justify-between"><span class="text-gray-500 shrink-0 mr-4">Booking Code</span><span id="mdl_code" class="font-bold text-[#4A6EB0] truncate"></span></div>
-                <div class="flex justify-between"><span class="text-gray-500 shrink-0 mr-4">User</span><span id="mdl_user" class="font-bold text-[#1C2C4A] truncate text-right"></span></div>
-                <div class="flex justify-between"><span class="text-gray-500 shrink-0 mr-4">Phone Number</span><span id="mdl_phone" class="font-bold text-[#1C2C4A] truncate"></span></div>
-                <div class="flex justify-between"><span class="text-gray-500 shrink-0 mr-4">Id Number</span><span id="mdl_idnum" class="font-bold text-[#1C2C4A] truncate"></span></div>
-                <div class="flex justify-between"><span class="text-gray-500 shrink-0 mr-4">Date Pickup</span><span id="mdl_start" class="font-bold text-[#1C2C4A] truncate"></span></div>
-                <div class="flex justify-between"><span class="text-gray-500 shrink-0 mr-4">Return Date</span><span id="mdl_end" class="font-bold text-[#1C2C4A] truncate"></span></div>
-                <div class="flex justify-between"><span class="text-gray-500 shrink-0 mr-4">Payment status</span><span id="mdl_paystat" class="font-bold text-green-500 truncate"></span></div>
-                <div class="flex justify-between"><span class="text-gray-500 shrink-0 mr-4">Total</span><span id="mdl_total" class="font-bold text-[#4A6EB0] truncate"></span></div>
-                <div class="flex justify-between"><span class="text-gray-500 shrink-0 mr-4">Verified</span><span id="mdl_verified" class="font-bold text-[#1C2C4A] truncate"></span></div>
-            </div>
-
-            <div id="mdl_return_details_container" class="hidden mb-6 space-y-3 text-xs md:text-sm border-b border-gray-100 pb-6 bg-[#F8FAFC] p-4 rounded-xl">
-                <h3 class="font-bold text-[#4A6EB0] text-sm uppercase tracking-wider mb-4 border-b border-gray-200 pb-2">Inspection Return Results</h3>
-                
-                <div class="grid grid-cols-2 gap-y-2">
-                    <span class="text-gray-500">Body & Exterior:</span>
-                    <span id="mdl_ret_body" class="font-bold text-[#1C2C4A] text-right"></span>
-                    
-                    <span class="text-gray-500">Interior:</span>
-                    <span id="mdl_ret_interior" class="font-bold text-[#1C2C4A] text-right"></span>
-                    
-                    <span class="text-gray-500">Tire Condition:</span>
-                    <span id="mdl_ret_tire" class="font-bold text-[#1C2C4A] text-right"></span>
-                    
-                    <span class="text-gray-500">Mileage:</span>
-                    <span id="mdl_ret_mileage" class="font-bold text-[#1C2C4A] text-right"></span>
-                    
-                    <span class="text-gray-500">Delay:</span>
-                    <span id="mdl_ret_delay" class="font-bold text-[#1C2C4A] text-right"></span>
+                <div class="space-y-4 md:space-y-6 mb-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4">
+                        <span class="text-gray-500 text-xs md:text-sm font-semibold">KTP</span>
+                        <img id="mdl_doc_ktp" src="" class="w-full sm:w-48 rounded-lg shadow-sm border border-gray-200">
+                    </div>
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4">
+                        <span class="text-gray-500 text-xs md:text-sm font-semibold">SIM</span>
+                        <img id="mdl_doc_sim" src="" class="w-full sm:w-48 rounded-lg shadow-sm border border-gray-200">
+                    </div>
+                    <div id="passport_wrapper" class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4 hidden">
+                        <span class="text-gray-500 text-xs md:text-sm font-semibold">Passport</span>
+                        <img id="mdl_doc_passport" src="" class="w-full sm:w-48 rounded-lg shadow-sm border border-gray-200">
+                    </div>
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4">
+                        <span class="text-gray-500 text-xs md:text-sm font-semibold">Selfi</span>
+                        <img id="mdl_doc_selfie" src="" class="w-full sm:w-32 rounded-lg shadow-sm border border-gray-200">
+                    </div>
                 </div>
 
-                <div class="pt-2 mt-2 border-t border-gray-200 grid grid-cols-2 gap-y-2">
-                    <span class="text-gray-500">Damage Fine:</span>
-                    <span id="mdl_ret_dmg_fine" class="font-bold text-red-500 text-right"></span>
-                    
-                    <span class="text-gray-500">Late Fine:</span>
-                    <span id="mdl_ret_late_fine" class="font-bold text-red-500 text-right"></span>
-                    
-                    <span class="text-gray-500 font-bold">Total Fine:</span>
-                    <span id="mdl_ret_total_fine" class="font-extrabold text-red-500 text-right text-base"></span>
+                <div id="mdl_action_buttons" class="flex flex-col sm:flex-row justify-between gap-3 md:gap-4 w-full pt-4 border-t border-gray-100">
                 </div>
 
-                <div class="mt-4">
-                    <span class="text-gray-500 block mb-1 text-[10px] uppercase font-bold">General Notes:</span>
-                    <p id="mdl_ret_notes" class="text-[#1C2C4A] bg-white p-3 rounded-lg border border-gray-200 italic"></p>
-                </div>
-            </div>
-
-            <div class="space-y-4 md:space-y-6 mb-8">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4">
-                    <span class="text-gray-500 text-xs md:text-sm font-semibold">KTP</span>
-                    <img id="mdl_doc_ktp" src="" class="w-full sm:w-48 rounded-lg shadow-sm border border-gray-200">
-                </div>
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4">
-                    <span class="text-gray-500 text-xs md:text-sm font-semibold">SIM</span>
-                    <img id="mdl_doc_sim" src="" class="w-full sm:w-48 rounded-lg shadow-sm border border-gray-200">
-                </div>
-                <div id="passport_wrapper" class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4 hidden">
-                    <span class="text-gray-500 text-xs md:text-sm font-semibold">Passport</span>
-                    <img id="mdl_doc_passport" src="" class="w-full sm:w-48 rounded-lg shadow-sm border border-gray-200">
-                </div>
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4">
-                    <span class="text-gray-500 text-xs md:text-sm font-semibold">Selfi</span>
-                    <img id="mdl_doc_selfie" src="" class="w-full sm:w-32 rounded-lg shadow-sm border border-gray-200">
-                </div>
-            </div>
-
-            <div id="mdl_action_buttons" class="flex flex-col sm:flex-row justify-between gap-3 md:gap-4 w-full">
             </div>
         </div>
     </div>
@@ -470,6 +478,35 @@
     </div>
 
     <script>
+        // 🟢 FUNGSI BARU: Cegah tanggal mundur karena konversi otomatis ke UTC
+        function formatLocalDate(dateString) {
+            if (!dateString) return '-';
+            const d = new Date(dateString);
+            let month = '' + (d.getMonth() + 1);
+            let day = '' + d.getDate();
+            let year = d.getFullYear();
+            if (month.length < 2) month = '0' + month;
+            if (day.length < 2) day = '0' + day;
+            return [year, month, day].join('-');
+        }
+
+        function formatLocalDateTime(dateString) {
+            if (!dateString) return '-';
+            const d = new Date(dateString);
+            let month = '' + (d.getMonth() + 1);
+            let day = '' + d.getDate();
+            let year = d.getFullYear();
+            let hours = '' + d.getHours();
+            let mins = '' + d.getMinutes();
+            let secs = '' + d.getSeconds();
+            if (month.length < 2) month = '0' + month;
+            if (day.length < 2) day = '0' + day;
+            if (hours.length < 2) hours = '0' + hours;
+            if (mins.length < 2) mins = '0' + mins;
+            if (secs.length < 2) secs = '0' + secs;
+            return `${year}-${month}-${day}, ${hours}:${mins}:${secs}`;
+        }
+
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebarOverlay');
@@ -499,7 +536,6 @@
             return "Rp " + num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         }
 
-        // Kalkulasi Denda Real-time
         function calculateTotalFine() {
             let dmg = parseFloat(document.getElementById('inp_damage_fine').value) || 0;
             let late = parseFloat(document.getElementById('inp_late_fine').value) || 0;
@@ -515,11 +551,14 @@
             document.getElementById('mdl_user').innerText = booking.renter_name;
             document.getElementById('mdl_phone').innerText = booking.renter_phone;
             document.getElementById('mdl_idnum').innerText = booking.renter_id_number;
-            document.getElementById('mdl_start').innerText = booking.start_date.split('T')[0];
-            document.getElementById('mdl_end').innerText = booking.end_date.split('T')[0];
+            
+            // 🟢 GUNAKAN formatLocalDate() DISINI 🟢
+            document.getElementById('mdl_start').innerText = formatLocalDate(booking.start_date);
+            document.getElementById('mdl_end').innerText = formatLocalDate(booking.end_date);
+            
             document.getElementById('mdl_paystat').innerText = booking.payment_status;
             document.getElementById('mdl_total').innerText = formatRupiah(booking.total_price);
-            document.getElementById('mdl_verified').innerText = booking.verified_at ? booking.verified_at.replace('T', ', ').substring(0,19) : '-';
+            document.getElementById('mdl_verified').innerText = booking.verified_at ? formatLocalDateTime(booking.verified_at) : '-';
 
             document.getElementById('mdl_doc_ktp').src = `/storage/${booking.doc_ktp}`;
             document.getElementById('mdl_doc_sim').src = `/storage/${booking.doc_sim}`;
@@ -536,13 +575,36 @@
             const badge = document.getElementById('mdl_status_badge');
             badge.innerText = uiStatus;
             badge.className = "px-3 py-1 md:px-4 md:py-1 text-[9px] md:text-[10px] rounded-full font-bold shadow-sm text-white shrink-0 self-end sm:self-auto"; 
+            
             if(uiStatus == 'Pending') badge.classList.add('bg-orange-300');
+            else if(uiStatus == 'Awaiting') badge.classList.add('bg-gray-400', 'text-white');
             else if(uiStatus == 'Verified') badge.classList.add('bg-pink-300');
             else if(uiStatus == 'Active') badge.classList.add('bg-cyan-300');
             else if(uiStatus == 'Completed') badge.classList.add('bg-green-300');
-            else badge.classList.add('bg-gray-400');
+            else badge.classList.add('bg-red-300');
 
-            // Logic untuk bagian Detail Return Inspection
+            // 🟢 FIX: Kalkulasi Info Telat Menggunakan Format Lokal 🟢
+            const now = new Date();
+            const endDateStr = formatLocalDate(booking.end_date);
+            const endTimeStr = booking.pickup_time ? booking.pickup_time : '00:00:00';
+            const endDate = new Date(`${endDateStr}T${endTimeStr}`);
+
+            let lateHtml = '';
+            if (uiStatus === 'Active' && now > endDate) {
+                const diffTime = Math.abs(now - endDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                lateHtml = `
+                    <div class="mb-4 bg-red-100 border border-red-300 text-red-600 px-4 py-3 rounded-xl flex items-center gap-3 shadow-sm animate-pulse">
+                        <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+                        <div>
+                            <p class="font-bold text-sm">Waktu Sewa Habis!</p>
+                            <p class="text-xs font-medium">Customer terlambat mengembalikan mobil selama <strong class="text-red-700">${diffDays} hari</strong>.</p>
+                        </div>
+                    </div>
+                `;
+            }
+            document.getElementById('mdl_late_info').innerHTML = lateHtml;
+
             const retContainer = document.getElementById('mdl_return_details_container');
             if(uiStatus === 'Completed' && booking.body_condition) {
                 document.getElementById('mdl_ret_body').innerText = booking.body_condition;
@@ -575,6 +637,15 @@
                     </form>
                 `;
             } 
+            else if (uiStatus === 'Awaiting') {
+                btnBox.innerHTML = `
+                    ${closeBtn}
+                    <form method="POST" action="/admin/bookings/${booking.id}/cancel" class="w-full sm:w-1/2">
+                        @csrf
+                        <button type="submit" class="w-full py-2.5 md:py-3 rounded-full bg-red-500 text-white font-bold hover:bg-red-600 transition shadow-md text-sm">Cancel Order</button>
+                    </form>
+                `;
+            }
             else if (uiStatus === 'Active') {
                 btnBox.innerHTML = `
                     ${closeBtn}
@@ -611,11 +682,9 @@
 
         function openPickupModal(booking, car) {
             document.getElementById('pickupForm').action = `/admin/bookings/${booking.id}/pickup`;
-            // Pastikan ID html pickup modal sesuai kalo ada error nampilin gambar
             toggleModal('pickupModal');
         }
 
-        // 🟢 LOGIKA FILTER DAN SEARCH REAL-TIME 🟢
         document.addEventListener("DOMContentLoaded", function() {
             const searchInput = document.getElementById('searchInput');
             const statusFilter = document.getElementById('statusFilter');
@@ -651,6 +720,13 @@
 
             searchInput.addEventListener('input', filterTable);
             statusFilter.addEventListener('change', filterTable);
+        });
+    </script>
+    <script>
+        window.addEventListener('pageshow', function (event) {
+            if (event.persisted || (typeof window.performance != "undefined" && window.performance.navigation.type === 2)) {
+                window.location.reload();
+            }
         });
     </script>
 </body>
